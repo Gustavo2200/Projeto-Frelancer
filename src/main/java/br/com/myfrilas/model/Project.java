@@ -2,7 +2,7 @@ package br.com.myfrilas.model;
 
 import java.util.Date;
 
-import br.com.enums.StatusProject;
+import br.com.myfrilas.enums.StatusProject;
 
 public class Project {
     

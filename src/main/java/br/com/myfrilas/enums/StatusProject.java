@@ -1,4 +1,4 @@
-package br.com.enums;
+package br.com.myfrilas.enums;
 
 public enum StatusProject {
     
