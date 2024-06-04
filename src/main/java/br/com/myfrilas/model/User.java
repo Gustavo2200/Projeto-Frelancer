@@ -2,6 +2,8 @@ package br.com.myfrilas.model;
 
 import java.util.List;
 
+import br.com.myfrilas.enums.TypeUser;
+
 public class User {
     private String name;
     private String cpf;
@@ -9,19 +11,21 @@ public class User {
     private String phone;
     private String password;
     private byte ranking;
+    private TypeUser typeUser;
     private List<Project> projects;
     private List<Assessment> assessments;
 
     public User() {}
     
-    public User(String name, String cpf, String email, String phone, String password, byte ranking, List<Project> projects,
-            List<Assessment> assessments) {
+    public User(String name, String cpf, String email, String phone, String password, byte ranking, TypeUser typeUser,
+            List<Project> projects, List<Assessment> assessments) {
         this.name = name;
         this.cpf = cpf;
         this.email = email;
         this.phone = phone;
         this.password = password;
         this.ranking = ranking;
+        this.typeUser = typeUser;
         this.projects = projects;
         this.assessments = assessments;
     }
@@ -61,6 +65,7 @@ public class User {
     public List<Project> getProjects() {
         return projects;
     }
+    
     public void setProjects(List<Project> projects) {
         this.projects = projects;
     }
@@ -77,5 +82,13 @@ public class User {
 
     public void setCpf(String cpf) {
         this.cpf = cpf;
+    }
+
+    public TypeUser getTypeUser() {
+        return typeUser;
+    }
+
+    public void setTypeUser(TypeUser typeUser) {
+        this.typeUser = typeUser;
     }
 }

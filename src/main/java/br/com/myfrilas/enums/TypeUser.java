@@ -1,25 +1,22 @@
 package br.com.myfrilas.enums;
 
-public enum StatusProject {
-    
-    Open(0, "Aberto"),
-    IN_PROGRESS (1, "Em andamento"),
-    DONE (2, "Concluído"),
-    CANCELED (3, "Cancelado");
+public enum TypeUser {
+    CUSTOMER(0, "Cliente"),
+    FREELANCER(1, "Freelancer");
 
     private int type;
     private String description;
 
-    StatusProject(int type, String description) {
+    TypeUser(int type, String description) {
         this.type = type;
         this.description = description;
     }
 
     public int getType() {
         return type;
-    }
+    }   
 
-    public String getDescription() {
+    public String getDescription() {    
         return description;
     }
 }

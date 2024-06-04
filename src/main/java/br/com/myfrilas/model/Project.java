@@ -9,15 +9,15 @@ public class Project {
     private String title;
     private String description;
     private double price;
-    private Client client; 
-    private Freelancer freelancer;
+    private User client; 
+    private User freelancer;
     private Date startDate;
     private Date endDate;
     private StatusProject status;
 
     public Project() {}
     
-    public Project(String title, String description, double price, Client client, Freelancer freelancer, Date startDate,
+    public Project(String title, String description, double price, User client, User freelancer, Date startDate,
             Date endDate, StatusProject status) {
         this.title = title;
         this.description = description;
@@ -47,16 +47,16 @@ public class Project {
     public void setPrice(double price) {
         this.price = price;
     }
-    public Client getClient() {
+    public User getClient() {
         return client;
     }
-    public void setClient(Client client) {
+    public void setClient(User client) {
         this.client = client;
     }
-    public Freelancer getFreelancer() {
+    public User getFreelancer() {
         return freelancer;
     }
-    public void setFreelancer(Freelancer freelancer) {
+    public void setFreelancer(User freelancer) {
         this.freelancer = freelancer;
     }
     public Date getStartDate() {
