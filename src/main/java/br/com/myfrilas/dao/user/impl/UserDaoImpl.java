@@ -1,5 +1,7 @@
 package br.com.myfrilas.dao.user.impl;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -72,5 +74,18 @@ public class UserDaoImpl implements UserDao {
         SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("phone", phone);
         Integer count = namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Integer.class);
         return count != null && count > 0;
+    }
+
+    @Override
+    public Map<String, Object> getUser(String email) {
+        String query = "SELECT NR_ID_USUARIO, DS_EMAIL, DS_SENHA, TP_TIPO_USUARIO FROM TB_USUARIO WHERE DS_EMAIL = :email";
+        SqlParameterSource parameters = new MapSqlParameterSource().addValue("email", email);
+        
+        try {
+            return namedParameterJdbcTemplate.queryForMap(query, parameters);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

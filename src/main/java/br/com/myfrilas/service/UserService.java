@@ -73,6 +73,14 @@ public class UserService {
             erros.add(new ErrResponse("Telefone invalido", HttpStatus.BAD_REQUEST.value()));
         }
 
+        if(user.getPassword().length() < 6 && user.getPassword().length() > 20) {
+            erros.add(new ErrResponse("Senha deve ter entre 6 e 20 caracteres", HttpStatus.BAD_REQUEST.value()));
+        }
+
+        if( user.getTypeUser() == null) {
+            erros.add(new ErrResponse("Tipo de usuario invalido, deve ser FREELANCER ou CUSTOMER", HttpStatus.BAD_REQUEST.value()));
+        }
+
         if (!erros.isEmpty()) {
             throw new FreelasException(erros, HttpStatus.BAD_REQUEST.value());
         }

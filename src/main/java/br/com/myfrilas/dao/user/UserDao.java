@@ -1,5 +1,7 @@
 package br.com.myfrilas.dao.user;
 
+import java.util.Map;
+
 import br.com.myfrilas.model.User;
 
 public interface UserDao {
@@ -8,5 +10,6 @@ public interface UserDao {
     boolean checkCpfExists(String cpf);
     boolean checkEmailExists(String email);
     boolean checkPhoneExists(String phone);
+    Map<String, Object> getUser(String email);
     
 }
