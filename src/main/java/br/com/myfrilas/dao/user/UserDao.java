@@ -7,6 +7,7 @@ import br.com.myfrilas.model.User;
 public interface UserDao {
 
     void saveUser(User user);
+    User userById(Long id);
     boolean checkCpfExists(String cpf);
     boolean checkEmailExists(String email);
     boolean checkPhoneExists(String phone);

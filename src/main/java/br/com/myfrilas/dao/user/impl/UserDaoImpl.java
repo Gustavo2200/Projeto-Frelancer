@@ -2,7 +2,6 @@ package br.com.myfrilas.dao.user.impl;
 
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.myfrilas.dao.user.UserDao;
-import br.com.myfrilas.err.exceptions.FreelasException;
+import br.com.myfrilas.enums.TypeUser;
 import br.com.myfrilas.model.User;
 
 @Repository
@@ -37,14 +36,33 @@ public class UserDaoImpl implements UserDao {
                 .addValue("p_ds_email", user.getEmail())
                 .addValue("p_ds_senha", user.getPassword())
                 .addValue("p_nr_telefone", user.getPhone())
-                .addValue("p_nr_ranking", user.getRanking())
                 .addValue("p_tp_tipo_usuario", user.getTypeUser().toString());
 
         try {
             jdbcCall.execute(sqlParameterSource);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new FreelasException("Erro interno ao salvar usuário", HttpStatus.BAD_REQUEST.value());
+            throw new RuntimeException("Erro interno ao salvar usuário");
+        }
+    }
+    @Override
+    public User userById(Long id) {
+        String query = "SELECT * FROM TB_USUARIO WHERE NR_ID_USUARIO = :id";
+        try{
+            SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("id", id);
+            Map<String, Object> result = namedParameterJdbcTemplate.queryForMap(query, namedParameters);
+            User user = new User();
+            user.setName(result.get("NM_NOME").toString());
+            user.setCpf(result.get("NR_CPF").toString());
+            user.setEmail(result.get("DS_EMAIL").toString());
+            user.setPassword(result.get("DS_SENHA").toString());
+            user.setPhone(result.get("NR_TELEFONE").toString());
+            user.setTypeUser(TypeUser.valueOf(result.get("TP_TIPO_USUARIO").toString()));
+           
+            return user;
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("Erro interno ao buscar usuário");
         }
     }
 

@@ -8,26 +8,17 @@ public class User {
     private String email;
     private String phone;
     private String password;
-    private byte ranking;
     private TypeUser typeUser;
 
     public User() {}
     
-    public User(String name, String cpf, String email, String phone, String password, byte ranking, TypeUser typeUser) {
+    public User(String name, String cpf, String email, String phone, String password, TypeUser typeUser) {
         this.name = name;
         this.cpf = cpf;
         this.email = email;
         this.phone = phone;
         this.password = password;
-        this.ranking = ranking;
         this.typeUser = typeUser;
-    }
-    public byte getRanking() {
-        return ranking;
-    }
-
-    public void setRanking(byte ranking) {
-        this.ranking = ranking;
     }
 
     public String getName() {

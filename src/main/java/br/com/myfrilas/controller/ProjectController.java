@@ -1,0 +1,112 @@
+package br.com.myfrilas.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.auth0.jwt.interfaces.DecodedJWT;
+
+import br.com.myfrilas.config.utils.TokenUtils;
+import br.com.myfrilas.dto.project.ProjectDtoRequest;
+import br.com.myfrilas.dto.project.ProjectDtoResponse;
+import br.com.myfrilas.dto.project.UpdateProjectDtoRequest;
+import br.com.myfrilas.model.Project;
+import br.com.myfrilas.service.ProjectService;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+
+
+@RestController
+@RequestMapping("/project")
+public class ProjectController {
+
+    @Autowired
+    private ProjectService projectService;
+    
+    @Autowired
+    private TokenUtils tokenUtils;
+
+    @PostMapping("/save-project")
+    public ResponseEntity<?> saveProject(@RequestHeader("Authorization") String token, @RequestBody ProjectDtoRequest project) {
+
+         DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7)); // Remove o prefixo "Bearer "
+         String role = decodedJWT.getClaim("role").asString();
+
+        if("FREELANCER".equals(role)) {
+            return new ResponseEntity<>("Acesso não permitido a Freelancers", HttpStatus.FORBIDDEN);   
+        }
+        String userId = decodedJWT.getClaim("user_id").asString(); // Extrai o ID do usuário
+        projectService.saveProject(Long.parseLong(userId), project);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<?> listProjectsByStatus(@RequestParam("projects") String status) {
+        List<ProjectDtoResponse> projects = projectService.listProjectsByStatus(status);
+        return new ResponseEntity<>(projects, HttpStatus.OK);
+    }
+    @PutMapping("/update")
+    public ResponseEntity<?> updateProject(@RequestHeader("Authorization") String token, @RequestBody UpdateProjectDtoRequest project) {
+        
+        DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7)); // Remove o prefixo "Bearer "
+        String role = decodedJWT.getClaim("role").asString();
+        if("FREELANCER".equals(role)) {
+            return new ResponseEntity<>("Acesso não permitido a Freelancers", HttpStatus.FORBIDDEN);
+        }
+        String userId = decodedJWT.getClaim("user_id").asString(); // Extrai o ID do usuário
+        projectService.updateProject(project, Integer.parseInt(userId));
+        
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> findProjectById(@PathVariable Long id) {
+        Project project = projectService.findProjectById(id);
+        return new ResponseEntity<>(project, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteProject(@RequestHeader("Authorization") String token, 
+                @RequestParam("id") Long id) {
+
+        DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7));
+        String role = decodedJWT.getClaim("role").asString();
+        if("FREELANCER".equals(role)) {
+            return new ResponseEntity<>("Acesso não permitido a Freelancers", HttpStatus.FORBIDDEN);
+        }
+        String userId = decodedJWT.getClaim("user_id").asString(); 
+        projectService.deleteProject(id, Integer.parseInt(userId));
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/my-projects")
+    public ResponseEntity<?> listProjectsByCustomerId(@RequestHeader("Authorization") String token) {
+
+        DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7));
+        String userId = decodedJWT.getClaim("user_id").asString();
+        String role = decodedJWT.getClaim("role").asString();
+
+        List<Project> projects = new ArrayList<>();
+
+        if("FREELANCER".equals(role)) {
+            projects = projectService.listProjectsByFreelancerId(Long.parseLong(userId));
+        }
+        else if("CUSTOMER".equals(role)) {
+            projects = projectService.listProjectsByCustomerId(Long.parseLong(userId));
+        }
+        return new ResponseEntity<>(projects, HttpStatus.OK);
+    }
+}

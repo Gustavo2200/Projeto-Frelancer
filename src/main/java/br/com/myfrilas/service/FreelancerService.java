@@ -23,7 +23,7 @@ public class FreelancerService {
 
     private Long checkBeforeSaving(String skillName) {
 
-        Long idSkill = this.freelancerDao.checkSkillExists(skillName);
+        Long idSkill = this.freelancerDao.idBySkillName(skillName);
 
         if(idSkill == null) {
             throw new FreelasException("Skill inexistente", HttpStatus.NOT_FOUND.value());

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import br.com.myfrilas.config.utils.TokenUtils;
-import br.com.myfrilas.dto.freelancer.SkillDtoRequest;
+import br.com.myfrilas.model.Skill;
 import br.com.myfrilas.service.FreelancerService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,11 +25,11 @@ public class FreelancerController {
     private TokenUtils tokenUtils;
     
     @PostMapping("/freelancers/save-skill")
-      public ResponseEntity<?> saveSkill(@RequestHeader("Authorization") String token, @RequestBody SkillDtoRequest skill) {
+      public ResponseEntity<?> saveSkill(@RequestHeader("Authorization") String token, @RequestBody Skill skill) {
             DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7)); // Remove o prefixo "Bearer "
             String role = decodedJWT.getClaim("role").asString();
 
-            if (!"FREELANCER".equals(role)) {
+            if ("CUSTOMER".equals(role)) {
                 return new ResponseEntity<>("Acesso permitido somente a Freelancers", HttpStatus.FORBIDDEN);
             }
 
