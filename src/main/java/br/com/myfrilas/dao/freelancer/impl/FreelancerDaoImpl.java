@@ -28,7 +28,7 @@ public class FreelancerDaoImpl implements FreelancerDao{
     }
 
     @Override
-    public Long checkSkillExists(String skill) {
+    public Long idBySkillName(String skill) {
         try{
             String querry = "SELECT NR_ID_SKILL FROM TB_SKILL WHERE NM_SKILL_NAME = :skill";
             SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("skill", skill);
@@ -47,6 +47,14 @@ public class FreelancerDaoImpl implements FreelancerDao{
                 .addValue("idSkill", idSkill);
         Integer count = namedParameterJdbcTemplate.queryForObject(query, namedParameters, Integer.class);
 
+        return count != null && count > 0;
+    }
+
+    @Override
+    public boolean checkSkillExists(String skill) {
+        String querry = "SELECT COUNT(1) FROM TB_SKILL WHERE NM_SKILL_NAME = :skill";
+        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("skill", skill);
+        Integer count = namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Integer.class);
         return count != null && count > 0;
     }
     

@@ -1,11 +1,9 @@
 package br.com.myfrilas.enums;
 
 public enum StatusProject {
-    
-    Open(0, "Aberto"),
-    IN_PROGRESS (1, "Em andamento"),
-    DONE (2, "Concluído"),
-    CANCELED (3, "Cancelado");
+    OPEN(0, "ABERTO"),
+    IN_PROGRESS(1, "EM_ANDAMENTO"),
+    DONE(2, "CONCLUIDO");
 
     private int type;
     private String description;
@@ -21,5 +19,14 @@ public enum StatusProject {
 
     public String getDescription() {
         return description;
+    }
+
+    public static StatusProject fromDescription(String description) {
+        for (StatusProject status : StatusProject.values()) {
+            if (status.getDescription().equalsIgnoreCase(description)) {
+                return status;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with description " + description);
     }
 }

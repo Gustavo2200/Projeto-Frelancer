@@ -9,7 +9,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import br.com.myfrilas.config.utils.TokenUtils;
+import br.com.myfrilas.err.ErrResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,7 +42,10 @@ public class FilterJwt extends OncePerRequestFilter {
             }catch(Exception e){
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
-                e.printStackTrace();
+                var err = new ErrResponse("Token inválido", 401, request.getRequestURI());
+                ObjectMapper mapper = new ObjectMapper();
+                response.getWriter().write(mapper.writeValueAsString(err));
+                response.setStatus(401);
                 return;
             }
 
