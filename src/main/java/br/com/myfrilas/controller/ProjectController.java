@@ -21,6 +21,7 @@ import br.com.myfrilas.dto.project.ProjectDtoRequest;
 import br.com.myfrilas.dto.project.ProjectDtoResponse;
 import br.com.myfrilas.dto.project.UpdateProjectDtoRequest;
 import br.com.myfrilas.model.Project;
+import br.com.myfrilas.model.Skill;
 import br.com.myfrilas.service.ProjectService;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -108,5 +109,32 @@ public class ProjectController {
             projects = projectService.listProjectsByCustomerId(Long.parseLong(userId));
         }
         return new ResponseEntity<>(projects, HttpStatus.OK);
+    }
+
+    @PostMapping("/add-skill")
+    public ResponseEntity<?> addSkillNecessary(@RequestHeader("Authorization") String token, 
+                @RequestParam("id") Long idProject, @RequestBody List<Skill> skills) {
+
+        DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7));
+        String role = decodedJWT.getClaim("role").asString();
+        if("FREELANCER".equals(role)) {
+            return new ResponseEntity<>("Acesso não permitido a Freelancers", HttpStatus.FORBIDDEN);
+        }
+        String userId = decodedJWT.getClaim("user_id").asString();
+        projectService.addSkillNecessary(skills, idProject, Integer.parseInt(userId));
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/remove-skill")
+    public ResponseEntity<?> removeSkillNecessary(@RequestHeader("Authorization") String token, 
+                @RequestParam("id") Long idProject, @RequestBody List<Skill> skills) {
+        DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7));
+        String role = decodedJWT.getClaim("role").asString();
+        if("FREELANCER".equals(role)) {
+            return new ResponseEntity<>("Acesso não permitido a Freelancers", HttpStatus.FORBIDDEN);
+        }
+        String userId = decodedJWT.getClaim("user_id").asString();
+        projectService.removeSkillNecessary(skills, idProject, Integer.parseInt(userId));
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

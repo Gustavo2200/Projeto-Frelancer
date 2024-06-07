@@ -68,6 +68,47 @@ public class ProjectService {
         }
         return projects;
     }
+
+    public void addSkillNecessary(List<Skill> skills, Long projectId, Integer idCustomer) {
+        checkBeforeUpdate(projectId, idCustomer);
+        checkBeforeAddSkills(skills, projectId);
+        Long[] idSkills = findIdSkills(skills);
+        projectDao.addSkillNecessary(idSkills, projectId);
+    }
+
+    public void removeSkillNecessary(List<Skill> skills, Long projectId, Integer idCustomer) {
+        checkBeforeUpdate(projectId, idCustomer);
+        if(checkBeforeDeleteSkills(skills, projectId)){
+            Long[] idSkills = findIdSkills(skills);
+            projectDao.removeSkillNecessary(idSkills, projectId);
+        }
+    }
+
+    private boolean checkBeforeDeleteSkills(List<Skill> skills, Long projectId) {
+        List<Skill> skillsProject = projectDao.getSkillsByProjectId(projectId);
+        for(Skill skill : skills) {
+            for(Skill skillProject : skillsProject) {
+                if(skill.getSkill().equals(skillProject.getSkill())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void checkBeforeAddSkills(List<Skill> skills, Long projectId) {
+        if(skills.size() == 0) {
+            throw new FreelasException("Nenhum skill informado", HttpStatus.BAD_REQUEST.value());
+        }
+        List<Skill> skillsProject = projectDao.getSkillsByProjectId(projectId);
+        for(Skill skill : skills) {
+            for(Skill skillProject : skillsProject) {
+                if(skill.getSkill().equals(skillProject.getSkill())) {
+                    throw new FreelasException("Skill ja adicionada no projeto", HttpStatus.BAD_REQUEST.value());
+                }
+            }
+        }
+    }
     
 
     private Long[] findIdSkills(List<Skill> skills) {

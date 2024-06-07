@@ -254,12 +254,36 @@ public class ProjectDaoImpl implements ProjectDao {
         Integer idCustomer = jdbcTemplate.queryForObject(query, new Object[] {id}, new int[] {Types.BIGINT}, Integer.class);
         return idCustomer;
     }
+    @Override
+    public void addSkillNecessary(Long[] skillIds, Long projectId) {
+        String query = "INSERT INTO TB_SKILLS_NECESSARIAS_PROJETO (FK_ID_PROJETO, FK_ID_SKILL) " +
+                 "VALUES (:idProject, :idSkill)";
 
-    private SimpleJdbcCall createJdbcCall(String functionName) {
-        return new SimpleJdbcCall(jdbcTemplate).withFunctionName(functionName);
+        for (int i = 0; i < skillIds.length; i++) {
+            SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                    .addValue("idProject", projectId)
+                    .addValue("idSkill", skillIds[i]);
+
+            namedParameterJdbcTemplate.update(query, sqlParameterSource);
+        }
+    }
+
+    @Override
+    public void removeSkillNecessary(Long[] skillIds, Long projectId) {
+        String query = "DELETE FROM TB_SKILLS_NECESSARIAS_PROJETO WHERE FK_ID_SKILL = :idSkill " +
+                 "AND FK_ID_PROJETO = :idProject";
+
+        for (int i = 0; i < skillIds.length; i++) {
+            SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                    .addValue("idSkill", skillIds[i])
+                    .addValue("idProject", projectId);
+                    
+            namedParameterJdbcTemplate.update(query, sqlParameterSource);
+        }
     }
     
-    private List<Skill> getSkillsByProjectId(Long projectId) {
+    @Override
+    public List<Skill> getSkillsByProjectId(Long projectId) {
     String query = "SELECT nm_skill_name FROM TB_SKILL s " +
                    "JOIN TB_SKILLS_NECESSARIAS_PROJETO psk ON s.nr_id_skill = psk.fk_id_skill " +
                    "WHERE psk.fk_id_projeto = ?";
@@ -271,5 +295,9 @@ public class ProjectDaoImpl implements ProjectDao {
             skills.add(new Skill(r.get("nm_skill_name").toString()));
         }
         return skills;
+    }
+
+    private SimpleJdbcCall createJdbcCall(String functionName) {
+        return new SimpleJdbcCall(jdbcTemplate).withFunctionName(functionName);
     }
 }
