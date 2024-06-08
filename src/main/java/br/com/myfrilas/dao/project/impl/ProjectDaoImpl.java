@@ -1,7 +1,6 @@
 package br.com.myfrilas.dao.project.impl;
 
 import java.math.BigDecimal;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +20,6 @@ import br.com.myfrilas.dto.project.UpdateProjectDtoRequest;
 import br.com.myfrilas.dto.user.UserDto;
 import br.com.myfrilas.enums.StatusProject;
 import br.com.myfrilas.model.Project;
-import br.com.myfrilas.model.Skill;
 
 @Repository
 public class ProjectDaoImpl implements ProjectDao {
@@ -163,9 +161,12 @@ public class ProjectDaoImpl implements ProjectDao {
 
     @Override
     public List<Project> listProjectsByCustomerId(Long id) {
-        String query = "SELECT * FROM TB_PROJETO WHERE FK_NR_ID_CLIENTE = ?";  
+        String query = "SELECT * FROM TB_PROJETO WHERE FK_NR_ID_CLIENTE = :id";
         
-        var result = jdbcTemplate.queryForList(query, id);
+        SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("id", id);
+
+        var result = namedParameterJdbcTemplate.queryForList(query, parameterSource);
+        
         List<Project> projects = new ArrayList<>();
         for(var r: result){
             Project project = new Project();
@@ -204,9 +205,11 @@ public class ProjectDaoImpl implements ProjectDao {
     @Override
     public List<Project> listProjectsByFreelancerId(Long id) {
 
-        String query = "SELECT * FROM TB_PROJETO WHERE FK_NR_ID_FREELANCER = ?";  
+        String query = "SELECT * FROM TB_PROJETO WHERE FK_NR_ID_FREELANCER = :id"; 
         
-        var result = jdbcTemplate.queryForList(query, id);
+        SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("id", id);
+        
+        var result = namedParameterJdbcTemplate.queryForList(query, parameterSource);
         List<Project> projects = new ArrayList<>();
         for(var r: result){
             Project project = new Project();
@@ -250,8 +253,9 @@ public class ProjectDaoImpl implements ProjectDao {
     }
     @Override
     public Integer customerIdByProjectId(Long id) {
-        String query = "SELECT FK_NR_ID_CLIENTE FROM TB_PROJETO WHERE NR_ID_PROJETO = ?";
-        Integer idCustomer = jdbcTemplate.queryForObject(query, new Object[] {id}, new int[] {Types.BIGINT}, Integer.class);
+        String query = "SELECT FK_NR_ID_CLIENTE FROM TB_PROJETO WHERE NR_ID_PROJETO = :id";
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("id", id);
+        Integer idCustomer = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, Integer.class);
         return idCustomer;
     }
     @Override
@@ -283,16 +287,19 @@ public class ProjectDaoImpl implements ProjectDao {
     }
     
     @Override
-    public List<Skill> getSkillsByProjectId(Long projectId) {
-    String query = "SELECT nm_skill_name FROM TB_SKILL s " +
+    public List<String> getSkillsByProjectId(Long projectId) {
+        String query = "SELECT nm_skill_name FROM TB_SKILL s " +
                    "JOIN TB_SKILLS_NECESSARIAS_PROJETO psk ON s.nr_id_skill = psk.fk_id_skill " +
-                   "WHERE psk.fk_id_projeto = ?";
+                   "WHERE psk.fk_id_projeto = :idProject";
+        
+        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("idProject", projectId);
 
-    var result = jdbcTemplate.queryForList(query, new Object[] {projectId}, new int[] {Types.BIGINT});
-        List<Skill> skills = new ArrayList<>();
+        var result = namedParameterJdbcTemplate.queryForList(query, namedParameters);
+    
+        List<String> skills = new ArrayList<>();
 
         for(var r : result){
-            skills.add(new Skill(r.get("nm_skill_name").toString()));
+            skills.add((String) r.get("nm_skill_name"));
         }
         return skills;
     }

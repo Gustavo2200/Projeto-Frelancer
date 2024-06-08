@@ -15,12 +15,12 @@ public class Project {
     private UserDto client; 
     private UserDto freelancer;
     private StatusProject status;
-    private List<Skill> necessarySkills;
+    private List<String> necessarySkills;
 
     public Project() {}
     
     public Project(Long id, String title, String description, BigDecimal price, UserDto client, UserDto freelancer,
-            StatusProject status, List<Skill> necessarySkills ) {
+            StatusProject status, List<String> necessarySkills ) {
 
         this.id = id;
         this.title = title;
@@ -76,11 +76,11 @@ public class Project {
         this.status = status;
     }
 
-    public List<Skill> getSkills() {
+    public List<String> getSkills() {
         return necessarySkills;
     }
 
-    public void setSkills(List<Skill> necessarySkills) {
+    public void setSkills(List<String> necessarySkills) {
         this.necessarySkills = necessarySkills;
     }
     

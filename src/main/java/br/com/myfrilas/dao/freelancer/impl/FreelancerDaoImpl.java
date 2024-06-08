@@ -1,5 +1,8 @@
 package br.com.myfrilas.dao.freelancer.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -7,6 +10,8 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import br.com.myfrilas.dao.freelancer.FreelancerDao;
+import br.com.myfrilas.dto.freelancer.FreelancerDtoResponse;
+import br.com.myfrilas.dto.proposal.ProposalDtoRequest;
 import br.com.myfrilas.err.exceptions.FreelasException;
 
 @Repository
@@ -19,12 +24,29 @@ public class FreelancerDaoImpl implements FreelancerDao{
     }
 
     @Override
-    public void saveSkill(Long idSkill, Long idFreelancer) {
+    public void saveSkill(List<Long> idSkills, Long idFreelancer) {
         String query = "INSERT INTO TB_FREELANCER_SKILLS (FK_ID_FREELANCER, FK_ID_SKILL) VALUES (:idFreelancer, :idSkill)";
-        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("idFreelancer", idFreelancer)
-                .addValue("idSkill", idSkill);
-        namedParameterJdbcTemplate.update(query, namedParameters);
         
+        for(Long idSkill : idSkills) {
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("idFreelancer", idFreelancer)
+                .addValue("idSkill", idSkill);
+                
+        namedParameterJdbcTemplate.update(query, namedParameters);
+        }
+    }
+
+    @Override
+    public void deleteSkill(List<Long> idSkills, Long idFreelancer) {
+        String query = "DELETE FROM TB_FREELANCER_SKILLS WHERE FK_ID_FREELANCER = :idFreelancer AND FK_ID_SKILL = :idSkill";
+        
+        for(Long idSkill : idSkills) {
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("idFreelancer", idFreelancer)
+                .addValue("idSkill", idSkill);
+
+        namedParameterJdbcTemplate.update(query, namedParameters);
+        }
     }
 
     @Override
@@ -42,7 +64,7 @@ public class FreelancerDaoImpl implements FreelancerDao{
 
     @Override
     public boolean checkSkillIsAlreadySaved(Long idSkill, Long idFreelancer) {
-        String query = "SELECT 1 FROM TB_FREELANCER_SKILLS WHERE FK_ID_FREELANCER = :idFreelancer AND FK_ID_SKILL = :idSkill";
+        String query = "SELECT COUNT(1) FROM TB_FREELANCER_SKILLS WHERE FK_ID_FREELANCER = :idFreelancer AND FK_ID_SKILL = :idSkill";
         SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("idFreelancer", idFreelancer)
                 .addValue("idSkill", idSkill);
         Integer count = namedParameterJdbcTemplate.queryForObject(query, namedParameters, Integer.class);
@@ -57,5 +79,61 @@ public class FreelancerDaoImpl implements FreelancerDao{
         Integer count = namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Integer.class);
         return count != null && count > 0;
     }
+
+    @Override
+    public FreelancerDtoResponse freelancerById(Long idFreelancer) {
+        String query = "SELECT * FROM TB_USUARIO WHERE NR_ID_USUARIO = :userId";
+        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("userId", idFreelancer);
+
+        var result = namedParameterJdbcTemplate.queryForMap(query, namedParameters);
+
+        FreelancerDtoResponse freelancer = new FreelancerDtoResponse();
+        freelancer.setId(((Number) result.get("NR_ID_USUARIO")).longValue());
+        freelancer.setName((String) result.get("NM_NOME"));
+        freelancer.setEmail((String) result.get("DS_EMAIL"));
+        freelancer.setCpf((String) result.get("NR_CPF"));
+        freelancer.setPhone((String) result.get("NR_TELEFONE"));
+        freelancer.setSkills(getSkillsByFreelancerId(idFreelancer));
+        return freelancer;
+        
+    }
+
+    @Override
+    public void sendProposal(ProposalDtoRequest proposal, Long idFreelancer) {
+        String query = "INSERT INTO TB_PROPOSTA (FK_ID_FREELANCER, FK_ID_PROJETO, NM_COMENTARIO, VL_VALOR) " +
+                "VALUES (:idFreelancer, :idProject, :comment, :value)";
+
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("idFreelancer", idFreelancer)
+                .addValue("idProject", proposal.getIdProject())
+                .addValue("comment", proposal.getComment())
+                .addValue("value", proposal.getValue());
+
+        namedParameterJdbcTemplate.update(query, namedParameters);
+    }
+
+    @Override
+    public boolean checkBeforeSendProposal(Long idProject) {
+        String query = "SELECT COUNT(1) FROM TB_PROJETO WHERE NR_ID_PROJETO = :idProject";
+        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("idProject", idProject);
+        Integer count = namedParameterJdbcTemplate.queryForObject(query, namedParameters, Integer.class);
+        return count != null && count > 0;
+    }
     
+    private List<String> getSkillsByFreelancerId(Long idFreelancer){
+        String query = "SELECT nm_skill_name FROM TB_SKILL s " +
+                       "JOIN TB_FREELANCER_SKILLS psk ON s.nr_id_skill = psk.fk_id_skill " +
+                       "WHERE psk.fk_id_freelancer = :idFreelancer";
+
+        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("idFreelancer", idFreelancer);
+
+        var result = namedParameterJdbcTemplate.queryForList(query, namedParameters);
+
+        List<String> skills = new ArrayList<>();
+        for(var r : result){
+            skills.add(r.get("nm_skill_name").toString());
+        }
+        return skills;
+     }
+
 }

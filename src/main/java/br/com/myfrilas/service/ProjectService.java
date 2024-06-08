@@ -85,10 +85,10 @@ public class ProjectService {
     }
 
     private boolean checkBeforeDeleteSkills(List<Skill> skills, Long projectId) {
-        List<Skill> skillsProject = projectDao.getSkillsByProjectId(projectId);
+        List<String> skillsProject = projectDao.getSkillsByProjectId(projectId);
         for(Skill skill : skills) {
-            for(Skill skillProject : skillsProject) {
-                if(skill.getSkill().equals(skillProject.getSkill())) {
+            for(String skillProject : skillsProject) {
+                if(skill.getSkill().equals(skillProject)) {
                     return true;
                 }
             }
@@ -100,10 +100,10 @@ public class ProjectService {
         if(skills.size() == 0) {
             throw new FreelasException("Nenhum skill informado", HttpStatus.BAD_REQUEST.value());
         }
-        List<Skill> skillsProject = projectDao.getSkillsByProjectId(projectId);
+        List<String> skillsProject = projectDao.getSkillsByProjectId(projectId);
         for(Skill skill : skills) {
-            for(Skill skillProject : skillsProject) {
-                if(skill.getSkill().equals(skillProject.getSkill())) {
+            for(String skillProject : skillsProject) {
+                if(skill.getSkill().equals(skillProject)) {
                     throw new FreelasException("Skill ja adicionada no projeto", HttpStatus.BAD_REQUEST.value());
                 }
             }
