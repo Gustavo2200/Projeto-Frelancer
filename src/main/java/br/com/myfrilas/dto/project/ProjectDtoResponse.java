@@ -3,7 +3,6 @@ package br.com.myfrilas.dto.project;
 import java.util.List;
 
 import br.com.myfrilas.enums.StatusProject;
-import br.com.myfrilas.model.Skill;
 
 public class ProjectDtoResponse {
     
@@ -12,11 +11,12 @@ public class ProjectDtoResponse {
     private String description;
     private String customerName;
     private StatusProject status;
-    private List<Skill> skills;
+    private List<String> skills;
     
     public ProjectDtoResponse() {}
 
-    public ProjectDtoResponse(Integer id, String title, String description, String customerName, StatusProject status, List<Skill> skills) {
+    public ProjectDtoResponse(Integer id, String title, String description, String customerName, 
+                StatusProject status, List<String> skills) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -56,11 +56,11 @@ public class ProjectDtoResponse {
         this.status = status;
     }
 
-    public List<Skill> getSkills() {
+    public List<String> getSkills() {
         return skills;
     }
 
-    public void setSkills(List<Skill> skills) {
+    public void setSkills(List<String> skills) {
         this.skills = skills;
     }
     

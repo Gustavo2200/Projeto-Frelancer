@@ -6,7 +6,6 @@ import br.com.myfrilas.dto.project.ProjectDtoRequest;
 import br.com.myfrilas.dto.project.ProjectDtoResponse;
 import br.com.myfrilas.dto.project.UpdateProjectDtoRequest;
 import br.com.myfrilas.model.Project;
-import br.com.myfrilas.model.Skill;
 
 public interface ProjectDao {
     
@@ -36,5 +35,5 @@ public interface ProjectDao {
 
     void removeSkillNecessary(Long[] skillIds, Long projectId);
 
-    List<Skill> getSkillsByProjectId(Long projectId);
+    List<String> getSkillsByProjectId(Long projectId);
 }
