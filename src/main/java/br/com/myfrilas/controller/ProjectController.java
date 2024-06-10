@@ -20,6 +20,7 @@ import br.com.myfrilas.config.utils.TokenUtils;
 import br.com.myfrilas.dto.project.ProjectDtoRequest;
 import br.com.myfrilas.dto.project.ProjectDtoResponse;
 import br.com.myfrilas.dto.project.UpdateProjectDtoRequest;
+import br.com.myfrilas.err.exceptions.FreelasException;
 import br.com.myfrilas.model.Project;
 import br.com.myfrilas.model.Skill;
 import br.com.myfrilas.service.ProjectService;
@@ -46,7 +47,7 @@ public class ProjectController {
          String role = decodedJWT.getClaim("role").asString();
 
         if("FREELANCER".equals(role)) {
-            return new ResponseEntity<>("Acesso não permitido a Freelancers", HttpStatus.FORBIDDEN);   
+            throw new FreelasException("Acesso nao permitido a Freelancers", HttpStatus.UNAUTHORIZED.value());
         }
         String userId = decodedJWT.getClaim("user_id").asString(); // Extrai o ID do usuário
         projectService.saveProject(Long.parseLong(userId), project);
@@ -65,10 +66,10 @@ public class ProjectController {
         DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7)); // Remove o prefixo "Bearer "
         String role = decodedJWT.getClaim("role").asString();
         if("FREELANCER".equals(role)) {
-            return new ResponseEntity<>("Acesso não permitido a Freelancers", HttpStatus.FORBIDDEN);
+            throw new FreelasException("Acesso nao permitido a Freelancers", HttpStatus.UNAUTHORIZED.value());
         }
         String userId = decodedJWT.getClaim("user_id").asString(); // Extrai o ID do usuário
-        projectService.updateProject(project, Integer.parseInt(userId));
+        projectService.updateProject(project, Long.parseLong(userId));
         
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -86,10 +87,10 @@ public class ProjectController {
         DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7));
         String role = decodedJWT.getClaim("role").asString();
         if("FREELANCER".equals(role)) {
-            return new ResponseEntity<>("Acesso não permitido a Freelancers", HttpStatus.FORBIDDEN);
+            throw new FreelasException("Acesso nao permitido a Freelancers", HttpStatus.UNAUTHORIZED.value());
         }
         String userId = decodedJWT.getClaim("user_id").asString(); 
-        projectService.deleteProject(id, Integer.parseInt(userId));
+        projectService.deleteProject(id, Long.parseLong(userId));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -121,7 +122,7 @@ public class ProjectController {
             return new ResponseEntity<>("Acesso não permitido a Freelancers", HttpStatus.FORBIDDEN);
         }
         String userId = decodedJWT.getClaim("user_id").asString();
-        projectService.addSkillNecessary(skills, idProject, Integer.parseInt(userId));
+        projectService.addSkillNecessary(skills, idProject, Long.parseLong(userId));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -131,10 +132,10 @@ public class ProjectController {
         DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7));
         String role = decodedJWT.getClaim("role").asString();
         if("FREELANCER".equals(role)) {
-            return new ResponseEntity<>("Acesso não permitido a Freelancers", HttpStatus.FORBIDDEN);
+            throw new FreelasException("Acesso nao permitido a Freelancers", HttpStatus.UNAUTHORIZED.value());
         }
         String userId = decodedJWT.getClaim("user_id").asString();
-        projectService.removeSkillNecessary(skills, idProject, Integer.parseInt(userId));
+        projectService.removeSkillNecessary(skills, idProject, Long.parseLong(userId));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

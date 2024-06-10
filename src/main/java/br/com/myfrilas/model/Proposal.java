@@ -4,26 +4,18 @@ import java.math.BigDecimal;
 
 public class Proposal {
     
-    private Long idProject;
+    private Long idProposal;
     private Long idFreelancer;
     private String comment;
     private BigDecimal value;
 
     public Proposal() {}
 
-    public Proposal(Long idProject, Long idFreelancer, String comment, BigDecimal value) {
-        this.idProject = idProject;
+    public Proposal(Long idProposal, Long idFreelancer, String comment, BigDecimal value) {
+        this.idProposal = idProposal;
         this.idFreelancer = idFreelancer;
         this.comment = comment;
         this.value = value;
-    }
-
-    public Long getIdProject() {
-        return idProject;
-    }
-
-    public void setIdProject(Long idProject) {
-        this.idProject = idProject;
     }
 
     public String getComment() {
@@ -48,6 +40,14 @@ public class Proposal {
 
     public void setIdFreelancer(Long idFreelancer) {
         this.idFreelancer = idFreelancer;
+    }
+
+    public Long getIdProposal() {
+        return idProposal;
+    }
+
+    public void setIdProposal(Long idProposal) {
+        this.idProposal = idProposal;
     }
 
     

@@ -2,7 +2,7 @@ package br.com.myfrilas.enums;
 
 public enum StatusProject {
     OPEN(0, "ABERTO"),
-    IN_PROGRESS(1, "EM_ANDAMENTO"),
+    IN_PROGRESS(1, "EM_PROGRESSO"),
     DONE(2, "CONCLUIDO");
 
     private int type;
