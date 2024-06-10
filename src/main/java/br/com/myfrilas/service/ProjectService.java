@@ -36,7 +36,7 @@ public class ProjectService {
         return projectDao.listProjectsByStatus(status);
     }
 
-    public void updateProject(UpdateProjectDtoRequest project, Integer id) {
+    public void updateProject(UpdateProjectDtoRequest project, Long id) {
         checkBeforeUpdate(project.getId(), id);
         projectDao.updateProject(project);
     }
@@ -48,7 +48,7 @@ public class ProjectService {
         return projectDao.getProjectById(id);
     }
 
-    public void deleteProject(Long idProject, Integer idCustomer) {
+    public void deleteProject(Long idProject, Long idCustomer) {
         checkBeforeUpdate(idProject, idCustomer);
         projectDao.deleteProjectById(idProject);
     }
@@ -69,14 +69,14 @@ public class ProjectService {
         return projects;
     }
 
-    public void addSkillNecessary(List<Skill> skills, Long projectId, Integer idCustomer) {
+    public void addSkillNecessary(List<Skill> skills, Long projectId, Long idCustomer) {
         checkBeforeUpdate(projectId, idCustomer);
         checkBeforeAddSkills(skills, projectId);
         Long[] idSkills = findIdSkills(skills);
         projectDao.addSkillNecessary(idSkills, projectId);
     }
 
-    public void removeSkillNecessary(List<Skill> skills, Long projectId, Integer idCustomer) {
+    public void removeSkillNecessary(List<Skill> skills, Long projectId, Long idCustomer) {
         checkBeforeUpdate(projectId, idCustomer);
         if(checkBeforeDeleteSkills(skills, projectId)){
             Long[] idSkills = findIdSkills(skills);
@@ -129,7 +129,7 @@ public class ProjectService {
             throw new FreelasException("Status não definido", HttpStatus.NOT_FOUND.value());
         }
     }
-    private void checkBeforeUpdate(Long  idProject, Integer idCustomer) {
+    private void checkBeforeUpdate(Long  idProject, Long idCustomer) {
         if(!projectDao.checkProjectExists(idProject)){
             
             throw new FreelasException("Projeto não encontrado", HttpStatus.NOT_FOUND.value());

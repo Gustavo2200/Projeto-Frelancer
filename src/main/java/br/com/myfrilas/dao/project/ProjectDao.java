@@ -16,16 +16,12 @@ public interface ProjectDao {
     void updateProject(UpdateProjectDtoRequest project);
 
     void deleteProjectById(Long id);
-
-    void acceptProposal(Project project);
-
-    void rejectProposal(Project project);
-
+    
     Project getProjectById(Long id);
 
     boolean checkProjectExists(Long id);
 
-    Integer customerIdByProjectId(Long id);
+    Long customerIdByProjectId(Long id);
 
     List<Project> listProjectsByCustomerId(Long id);
 

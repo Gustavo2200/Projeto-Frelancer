@@ -11,6 +11,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 
 import br.com.myfrilas.config.utils.TokenUtils;
 import br.com.myfrilas.dto.proposal.ProposalDtoRequest;
+import br.com.myfrilas.err.exceptions.FreelasException;
 import br.com.myfrilas.model.Skill;
 import br.com.myfrilas.service.FreelancerService;
 
@@ -40,7 +41,7 @@ public class FreelancerController {
             String role = decodedJWT.getClaim("role").asString();
 
             if ("CUSTOMER".equals(role)) {
-                return new ResponseEntity<>("Acesso permitido somente a Freelancers", HttpStatus.FORBIDDEN);
+                throw new FreelasException("Acesso permitido somente a Freelancers", HttpStatus.UNAUTHORIZED.value());
             }
 
             String userId = decodedJWT.getClaim("user_id").asString(); // Extrai o ID do usuário
@@ -56,7 +57,7 @@ public class FreelancerController {
         String role = decodedJWT.getClaim("role").asString();
 
         if ("CUSTOMER".equals(role)) {
-            return new ResponseEntity<>("Acesso permitido somente a Freelancers", HttpStatus.FORBIDDEN);
+            throw new FreelasException("Acesso permitido somente a Freelancers", HttpStatus.UNAUTHORIZED.value());
         }
 
         String userId = decodedJWT.getClaim("user_id").asString();
@@ -78,7 +79,7 @@ public class FreelancerController {
         String role = decodedJWT.getClaim("role").asString();
 
         if ("CUSTOMER".equals(role)) {
-            return new ResponseEntity<>("Acesso permitido somente a Freelancers", HttpStatus.FORBIDDEN);
+            throw new FreelasException("Acesso permitido somente a Freelancers", HttpStatus.UNAUTHORIZED.value());
         }
 
         String userId = decodedJWT.getClaim("user_id").asString();

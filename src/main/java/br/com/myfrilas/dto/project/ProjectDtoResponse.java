@@ -6,7 +6,7 @@ import br.com.myfrilas.enums.StatusProject;
 
 public class ProjectDtoResponse {
     
-    private Integer id;
+    private Long id;
     private String title;
     private String description;
     private String customerName;
@@ -15,7 +15,7 @@ public class ProjectDtoResponse {
     
     public ProjectDtoResponse() {}
 
-    public ProjectDtoResponse(Integer id, String title, String description, String customerName, 
+    public ProjectDtoResponse(Long id, String title, String description, String customerName, 
                 StatusProject status, List<String> skills) {
         this.id = id;
         this.title = title;
@@ -25,10 +25,10 @@ public class ProjectDtoResponse {
         this.skills = skills;
     }
     
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
     public String getTitle() {

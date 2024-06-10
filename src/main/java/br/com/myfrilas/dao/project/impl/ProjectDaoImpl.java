@@ -61,7 +61,7 @@ public class ProjectDaoImpl implements ProjectDao {
         List<ProjectDtoResponse> projects = new ArrayList<>();
         for(var r: result){
             ProjectDtoResponse project = new ProjectDtoResponse();
-            project.setId((Integer)r.get("NR_ID_PROJETO"));
+            project.setId(((Number)r.get("NR_ID_PROJETO")).longValue());
             project.setTitle((String)r.get("NM_TITULO"));
             project.setDescription((String)r.get("NM_DESCRICAO"));
             project.setStatus(StatusProject.fromDescription((String)r.get("TP_STATUS")));
@@ -99,18 +99,6 @@ public class ProjectDaoImpl implements ProjectDao {
             e.printStackTrace();
             throw new RuntimeException("Erro interno ao deletar o projeto");
         }
-    }
-
-    @Override
-    public void acceptProposal(Project project) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'acceptProposal'");
-    }
-
-    @Override
-    public void rejectProposal(Project project) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'rejectProposal'");
     }
 
     @Override
@@ -252,10 +240,10 @@ public class ProjectDaoImpl implements ProjectDao {
         return count != null && count > 0;
     }
     @Override
-    public Integer customerIdByProjectId(Long id) {
+    public Long customerIdByProjectId(Long id) {
         String query = "SELECT FK_NR_ID_CLIENTE FROM TB_PROJETO WHERE NR_ID_PROJETO = :id";
         SqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("id", id);
-        Integer idCustomer = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, Integer.class);
+        Long idCustomer = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, Long.class);
         return idCustomer;
     }
     @Override
