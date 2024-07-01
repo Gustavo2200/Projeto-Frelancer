@@ -111,14 +111,6 @@ public class FreelancerDaoImpl implements FreelancerDao{
 
         namedParameterJdbcTemplate.update(query, namedParameters);
     }
-
-    @Override
-    public boolean checkBeforeSendProposal(Long idProject) {
-        String query = "SELECT COUNT(1) FROM TB_PROJETO WHERE NR_ID_PROJETO = :idProject";
-        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("idProject", idProject);
-        Integer count = namedParameterJdbcTemplate.queryForObject(query, namedParameters, Integer.class);
-        return count != null && count > 0;
-    }
     
     private List<String> getSkillsByFreelancerId(Long idFreelancer){
         String query = "SELECT nm_skill_name FROM TB_SKILL s " +

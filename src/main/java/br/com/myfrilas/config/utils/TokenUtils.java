@@ -24,6 +24,8 @@ public class TokenUtils {
     @Value("${api.expiration.time}")
     private Long expiryTime;
 
+    private final int ONE_MINUTE = 60000;
+
     public TokenJwtResponse getToken(Map<String, Object> dataAuthentication) {
         String token = JWT.create()
                 .withIssuer(issuer)
@@ -32,7 +34,7 @@ public class TokenUtils {
                 .withClaim("email", dataAuthentication.get("DS_EMAIL").toString())
                 .withClaim("password", dataAuthentication.get("DS_SENHA").toString())
                 .withClaim("role", dataAuthentication.get("TP_TIPO_USUARIO").toString())
-                .withExpiresAt(new Date(System.currentTimeMillis() + (1000 * expiryTime)))
+                .withExpiresAt(new Date(System.currentTimeMillis() + (ONE_MINUTE * expiryTime)))
                 .sign(Algorithm.HMAC256(secretKey));
 
         return new TokenJwtResponse(token);

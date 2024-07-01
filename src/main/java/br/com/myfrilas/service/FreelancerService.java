@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import br.com.myfrilas.dao.freelancer.FreelancerDao;
+import br.com.myfrilas.dao.project.ProjectDao;
 import br.com.myfrilas.dto.freelancer.FreelancerDtoResponse;
 import br.com.myfrilas.dto.proposal.ProposalDtoRequest;
 import br.com.myfrilas.err.exceptions.FreelasException;
@@ -16,8 +17,12 @@ import br.com.myfrilas.model.Skill;
 public class FreelancerService {
     
     private FreelancerDao freelancerDao;
+    private ProjectDao projectDao;
 
-    public FreelancerService(FreelancerDao freelancerDao) { this.freelancerDao = freelancerDao;}
+    public FreelancerService(FreelancerDao freelancerDao, ProjectDao projectDao) { 
+        this.freelancerDao = freelancerDao;
+        this.projectDao = projectDao;
+    }
 
     public void saveSkill(Long idFreelancer, List<Skill> skills) {
         List<Long> idSkills = new ArrayList<>();
@@ -61,8 +66,11 @@ public class FreelancerService {
     }
 
     public void sendProposal(ProposalDtoRequest proposal, Long idFreelancer) {
-        if(!this.freelancerDao.checkBeforeSendProposal(proposal.getIdProject())) {
+        if(!projectDao.checkProjectExists(proposal.getIdProject())){
             throw new FreelasException("Projeto não encontrado", HttpStatus.NOT_FOUND.value());
+        }   
+        else if(!projectDao.checkStatusProject(proposal.getIdProject())){
+            throw new FreelasException("Apenas projetos abertos podem receber propostas", HttpStatus.BAD_REQUEST.value());
         }
         freelancerDao.sendProposal(proposal, idFreelancer);
     }

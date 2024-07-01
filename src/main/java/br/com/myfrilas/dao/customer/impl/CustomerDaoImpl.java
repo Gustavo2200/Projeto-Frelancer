@@ -76,6 +76,23 @@ public class CustomerDaoImpl implements CustomerDao{
     }
 
     @Override
+    public void completeProject(Long idProject) {
+        String query = "SELECT COMPLETE_PROJECT(:idProject)";
+
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("idProject", idProject);
+
+        try{
+            namedParameterJdbcTemplate.execute(query, sqlParameterSource, (PreparedStatementCallback<Object>) ps ->{
+                ps.execute();
+                return null;
+            });
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("Erro interno ao concluir projeto", e);
+        }
+    }
+
+    @Override
     public boolean checkProposalExists(Long idProposal) {
     
         String query = "SELECT COUNT(1) FROM TB_PROPOSTA WHERE NR_ID_PROPOSTA = :id";
@@ -90,6 +107,27 @@ public class CustomerDaoImpl implements CustomerDao{
     }
 
     @Override
+    public boolean checkBalanceCustomer(Long idCustomer, BigDecimal valueProject) {
+
+        String query = "SELECT VL_SALDO FROM TB_USUARIO WHERE NR_ID_USUARIO = :id";
+        
+        try{
+            SqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("id", idCustomer);
+            BigDecimal balance = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, BigDecimal.class);
+
+            if(balance == null){ 
+                return false;
+            }
+
+            return balance.compareTo(valueProject) >= 0;
+        
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("Erro checar saldo", e);
+        }
+    }
+
+    @Override
     public Long idProjectByIdProposal(Long idProposal) {
 
         String query = "SELECT FK_ID_PROJETO FROM TB_PROPOSTA WHERE NR_ID_PROPOSTA = :id";
@@ -100,6 +138,21 @@ public class CustomerDaoImpl implements CustomerDao{
         }catch(Exception e){
             e.printStackTrace();
             throw new RuntimeException("Erro interno ao buscar proposta", e);
+        }
+    }
+
+    @Override
+    public void depositBalance(Long idCustomer, BigDecimal value) {
+        String query = "UPDATE TB_USUARIO SET VL_SALDO = VL_SALDO + :value WHERE NR_ID_USUARIO = :id";
+        try{
+            SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                    .addValue("id", idCustomer)
+                    .addValue("value", value);
+                    
+            namedParameterJdbcTemplate.update(query, sqlParameterSource);
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("Erro interno ao depositar saldo", e);
         }
     }
     
