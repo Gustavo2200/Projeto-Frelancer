@@ -1,5 +1,6 @@
 package br.com.myfrilas.dao.project;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import br.com.myfrilas.dto.project.ProjectDtoRequest;
@@ -32,4 +33,8 @@ public interface ProjectDao {
     void removeSkillNecessary(Long[] skillIds, Long projectId);
 
     List<String> getSkillsByProjectId(Long projectId);
+
+    boolean checkStatusProject(Long idProject);
+
+    BigDecimal priceByProjectId(Long idProject);
 }

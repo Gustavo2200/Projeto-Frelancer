@@ -1,5 +1,6 @@
 package br.com.myfrilas.dao.user.impl;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -36,7 +37,8 @@ public class UserDaoImpl implements UserDao {
                 .addValue("p_ds_email", user.getEmail())
                 .addValue("p_ds_senha", user.getPassword())
                 .addValue("p_nr_telefone", user.getPhone())
-                .addValue("p_tp_tipo_usuario", user.getTypeUser().toString());
+                .addValue("p_tp_tipo_usuario", user.getTypeUser().toString())
+                .addValue("p_vl_valor", BigDecimal.ZERO);
 
         try {
             jdbcCall.execute(sqlParameterSource);

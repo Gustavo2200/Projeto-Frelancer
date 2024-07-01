@@ -20,6 +20,4 @@ public interface FreelancerDao {
     FreelancerDtoResponse freelancerById(Long idFreelancer);
 
     void sendProposal(ProposalDtoRequest proposal, Long idFreelancer);
-
-    boolean checkBeforeSendProposal(Long idProject);
 }

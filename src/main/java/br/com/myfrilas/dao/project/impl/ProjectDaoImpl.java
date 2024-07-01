@@ -292,6 +292,36 @@ public class ProjectDaoImpl implements ProjectDao {
         return skills;
     }
 
+    @Override
+    public boolean checkStatusProject(Long idProject) {
+
+        String query = "SELECT TP_STATUS FROM TB_PROJETO WHERE NR_ID_PROJETO = :idProject";
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("idProject", idProject);
+        String status = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, String.class);
+
+        if(status == null){
+            return false;
+        }
+        return status.equals("ABERTO");
+    }
+
+    @Override
+    public BigDecimal priceByProjectId(Long id) {
+        String query = "SELECT vl_preco FROM TB_PROJETO WHERE NR_ID_PROJETO = :id";
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("id", id);
+        try{
+            BigDecimal price = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, BigDecimal.class);
+        
+            if(price == null){
+                throw new RuntimeException("Projeto não encontrado");
+            }
+            return price;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("Erro interno ao buscar preço do projeto", e);
+        }
+    }
+
     private SimpleJdbcCall createJdbcCall(String functionName) {
         return new SimpleJdbcCall(jdbcTemplate).withFunctionName(functionName);
     }

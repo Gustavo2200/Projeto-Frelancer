@@ -1,5 +1,6 @@
 package br.com.myfrilas.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -49,9 +50,30 @@ public class CustomerService {
         customerDao.acceptProposal(idProposal);
     }
 
+    public void completeProject(Long idProject, Long idCustomer) {
+
+        validadeCustomer(idCustomer, idProject);
+        BigDecimal valueProject = projectDao.priceByProjectId(idProject);
+
+        if(!customerDao.checkBalanceCustomer(idCustomer, valueProject)){
+            throw new FreelasException("Seu saldo é insuficiente", HttpStatus.BAD_REQUEST.value());
+        }
+
+        customerDao.completeProject(idProject);
+    }
+
+    public void depositBalance(Long idCustomer, BigDecimal value) {
+        customerDao.depositBalance(idCustomer, value);
+    }
+
     private void validadeCustomer(Long idCustomer, Long idProject) {
-        if(idCustomer != projectDao.customerIdByProjectId(idProject)){
-            throw new FreelasException("Voce so pode ver propostas do seu projeto", HttpStatus.FORBIDDEN.value());
+
+        if(!projectDao.checkProjectExists(idProject)) {
+            throw new FreelasException("Projeto nao encontrado", HttpStatus.NOT_FOUND.value());
+        }
+
+        else if(idCustomer != projectDao.customerIdByProjectId(idProject)){
+            throw new FreelasException("Voce so pode ver propostas do seu projeto", HttpStatus.BAD_REQUEST.value());
         }
     }
 }

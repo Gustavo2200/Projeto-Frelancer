@@ -95,7 +95,7 @@ public class ProjectController {
     }
 
     @GetMapping("/my-projects")
-    public ResponseEntity<?> listProjectsByCustomerId(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> listProjectsByUserId(@RequestHeader("Authorization") String token) {
 
         DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7));
         String userId = decodedJWT.getClaim("user_id").asString();
