@@ -53,16 +53,16 @@ public class ProjectService {
         projectDao.deleteProjectById(idProject);
     }
 
-    public List<Project> listProjectsByCustomerId(Long id) {
-        List<Project> projects = projectDao.listProjectsByCustomerId(id);
+    public List<Project> listProjectsByCustomerId(Long id, String status) {
+        List<Project> projects = projectDao.listProjectsByCustomerId(id, status);
         if(projects.size() == 0) {
             throw new FreelasException("Nenhum projeto encontrado", HttpStatus.NOT_FOUND.value());
         }
         return projects;
     }
     
-    public List<Project> listProjectsByFreelancerId(Long id) {
-        List<Project> projects = projectDao.listProjectsByFreelancerId(id);
+    public List<Project> listProjectsByFreelancerId(Long id, String status) {
+        List<Project> projects = projectDao.listProjectsByFreelancerId(id, status);
         if(projects.size() == 0) {
             throw new FreelasException("Nenhum projeto encontrado", HttpStatus.NOT_FOUND.value());
         }

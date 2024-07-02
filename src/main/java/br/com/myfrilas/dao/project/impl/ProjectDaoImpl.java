@@ -148,10 +148,12 @@ public class ProjectDaoImpl implements ProjectDao {
     }
 
     @Override
-    public List<Project> listProjectsByCustomerId(Long id) {
-        String query = "SELECT * FROM TB_PROJETO WHERE FK_NR_ID_CLIENTE = :id";
+    public List<Project> listProjectsByCustomerId(Long id, String status) {
+        String query = "SELECT * FROM TB_PROJETO WHERE FK_NR_ID_CLIENTE = :id AND TP_STATUS = :status";
         
-        SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("id", id);
+        SqlParameterSource parameterSource = new MapSqlParameterSource()
+                .addValue("id", id)
+                .addValue("status", status);
 
         var result = namedParameterJdbcTemplate.queryForList(query, parameterSource);
         
@@ -191,11 +193,13 @@ public class ProjectDaoImpl implements ProjectDao {
     }
 
     @Override
-    public List<Project> listProjectsByFreelancerId(Long id) {
+    public List<Project> listProjectsByFreelancerId(Long id, String status) {
 
-        String query = "SELECT * FROM TB_PROJETO WHERE FK_NR_ID_FREELANCER = :id"; 
+        String query = "SELECT * FROM TB_PROJETO WHERE FK_NR_ID_FREELANCER = :id AND TP_STATUS = :status"; 
         
-        SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("id", id);
+        SqlParameterSource parameterSource = new MapSqlParameterSource()
+                .addValue("id", id)
+                .addValue("status", status);
         
         var result = namedParameterJdbcTemplate.queryForList(query, parameterSource);
         List<Project> projects = new ArrayList<>();

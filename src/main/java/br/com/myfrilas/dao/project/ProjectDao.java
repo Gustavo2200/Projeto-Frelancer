@@ -24,9 +24,9 @@ public interface ProjectDao {
 
     Long customerIdByProjectId(Long id);
 
-    List<Project> listProjectsByCustomerId(Long id);
+    List<Project> listProjectsByCustomerId(Long id, String status);
 
-    List<Project> listProjectsByFreelancerId(Long id);
+    List<Project> listProjectsByFreelancerId(Long id, String status);
 
     void addSkillNecessary(Long[] skillIds, Long projectId);
 

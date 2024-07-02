@@ -95,7 +95,8 @@ public class ProjectController {
     }
 
     @GetMapping("/my-projects")
-    public ResponseEntity<?> listProjectsByUserId(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> listProjectsByUserId(@RequestHeader("Authorization") String token,
+                @RequestParam("status") String status) {
 
         DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7));
         String userId = decodedJWT.getClaim("user_id").asString();
@@ -104,10 +105,10 @@ public class ProjectController {
         List<Project> projects = new ArrayList<>();
 
         if("FREELANCER".equals(role)) {
-            projects = projectService.listProjectsByFreelancerId(Long.parseLong(userId));
+            projects = projectService.listProjectsByFreelancerId(Long.parseLong(userId), status);
         }
         else if("CUSTOMER".equals(role)) {
-            projects = projectService.listProjectsByCustomerId(Long.parseLong(userId));
+            projects = projectService.listProjectsByCustomerId(Long.parseLong(userId), status);
         }
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
