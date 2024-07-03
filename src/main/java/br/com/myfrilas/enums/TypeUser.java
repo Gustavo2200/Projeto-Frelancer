@@ -19,4 +19,13 @@ public enum TypeUser {
     public String getDescription() {    
         return description;
     }
+
+    public static TypeUser fromDescription(String description) {
+        for (TypeUser type : TypeUser.values()) {
+            if (type.getDescription().equalsIgnoreCase(description)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with description " + description);
+    }
 }

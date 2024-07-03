@@ -6,6 +6,7 @@ import java.util.List;
 import br.com.myfrilas.dto.project.ProjectDtoRequest;
 import br.com.myfrilas.dto.project.ProjectDtoResponse;
 import br.com.myfrilas.dto.project.UpdateProjectDtoRequest;
+import br.com.myfrilas.enums.StatusProject;
 import br.com.myfrilas.model.Project;
 
 public interface ProjectDao {
@@ -34,7 +35,7 @@ public interface ProjectDao {
 
     List<String> getSkillsByProjectId(Long projectId);
 
-    boolean checkStatusProject(Long idProject);
+    StatusProject checkStatusProject(Long idProject);
 
     BigDecimal priceByProjectId(Long idProject);
 }

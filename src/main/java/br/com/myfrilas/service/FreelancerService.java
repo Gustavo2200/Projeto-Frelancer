@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import br.com.myfrilas.dao.freelancer.FreelancerDao;
 import br.com.myfrilas.dao.project.ProjectDao;
-import br.com.myfrilas.dto.freelancer.FreelancerDtoResponse;
 import br.com.myfrilas.dto.proposal.ProposalDtoRequest;
+import br.com.myfrilas.enums.StatusProject;
 import br.com.myfrilas.err.exceptions.FreelasException;
 import br.com.myfrilas.model.Skill;
 
@@ -19,7 +19,8 @@ public class FreelancerService {
     private FreelancerDao freelancerDao;
     private ProjectDao projectDao;
 
-    public FreelancerService(FreelancerDao freelancerDao, ProjectDao projectDao) { 
+    public FreelancerService(FreelancerDao freelancerDao, ProjectDao projectDao) {
+        
         this.freelancerDao = freelancerDao;
         this.projectDao = projectDao;
     }
@@ -56,20 +57,11 @@ public class FreelancerService {
         freelancerDao.deleteSkill(idSkills, idFreelancer);
     }
 
-    public FreelancerDtoResponse freelancerById(Long idFreelancer) {
-        FreelancerDtoResponse freelancer = freelancerDao.freelancerById(idFreelancer);
-        if(freelancer == null) {
-            throw new FreelasException("Freelancer não encontrado", HttpStatus.NOT_FOUND.value());
-        }
-
-        return freelancer;
-    }
-
     public void sendProposal(ProposalDtoRequest proposal, Long idFreelancer) {
         if(!projectDao.checkProjectExists(proposal.getIdProject())){
             throw new FreelasException("Projeto não encontrado", HttpStatus.NOT_FOUND.value());
         }   
-        else if(!projectDao.checkStatusProject(proposal.getIdProject())){
+        else if(projectDao.checkStatusProject(proposal.getIdProject()).getType() != StatusProject.OPEN.getType()) {
             throw new FreelasException("Apenas projetos abertos podem receber propostas", HttpStatus.BAD_REQUEST.value());
         }
         freelancerDao.sendProposal(proposal, idFreelancer);

@@ -1,7 +1,11 @@
 package br.com.myfrilas.dao.user;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
+import br.com.myfrilas.enums.TypeUser;
+import br.com.myfrilas.model.Transaction;
 import br.com.myfrilas.model.User;
 
 public interface UserDao {
@@ -12,5 +16,8 @@ public interface UserDao {
     boolean checkEmailExists(String email);
     boolean checkPhoneExists(String phone);
     Map<String, Object> getUser(String email);
-    
+    TypeUser typeUserById(Long id);
+    List<Transaction> transfrerHistoryByCustomerId(Long idCustomer);
+    List<Transaction> transfrerHistoryByFreelancerId(Long idFreelancer);
+    BigDecimal getBalance(Long id);
 }

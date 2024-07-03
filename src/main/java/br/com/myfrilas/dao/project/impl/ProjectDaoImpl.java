@@ -13,11 +13,9 @@ import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.stereotype.Repository;
 
 import br.com.myfrilas.dao.project.ProjectDao;
-import br.com.myfrilas.dao.user.UserDao;
 import br.com.myfrilas.dto.project.ProjectDtoRequest;
 import br.com.myfrilas.dto.project.ProjectDtoResponse;
 import br.com.myfrilas.dto.project.UpdateProjectDtoRequest;
-import br.com.myfrilas.dto.user.UserDto;
 import br.com.myfrilas.enums.StatusProject;
 import br.com.myfrilas.model.Project;
 
@@ -25,12 +23,10 @@ import br.com.myfrilas.model.Project;
 public class ProjectDaoImpl implements ProjectDao {
 
     private final JdbcTemplate jdbcTemplate;
-    private final UserDao userDao;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public ProjectDaoImpl(JdbcTemplate jdbcTemplate, UserDao userDao , NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public ProjectDaoImpl(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.userDao = userDao;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
@@ -54,7 +50,7 @@ public class ProjectDaoImpl implements ProjectDao {
 
     @Override
     public List<ProjectDtoResponse> listProjectsByStatus(String status) {
-        String query = "SELECT NR_ID_PROJETO, NM_TITULO, NM_DESCRICAO, TP_STATUS, TB_USUARIO.NM_NOME FROM TB_PROJETO \r\n" + //
+        String query = "SELECT NR_ID_PROJETO, NM_TITULO, NM_DESCRICAO, TP_STATUS, FK_NR_ID_CLIENTE, TB_USUARIO.NM_NOME FROM TB_PROJETO \r\n" + //
                         "JOIN TB_USUARIO ON FK_NR_ID_CLIENTE = NR_ID_USUARIO WHERE TP_STATUS = ?"; 
         
         var result = jdbcTemplate.queryForList(query, status);
@@ -65,6 +61,7 @@ public class ProjectDaoImpl implements ProjectDao {
             project.setTitle((String)r.get("NM_TITULO"));
             project.setDescription((String)r.get("NM_DESCRICAO"));
             project.setStatus(StatusProject.fromDescription((String)r.get("TP_STATUS")));
+            project.setCustomerId(((Number)r.get("FK_NR_ID_CLIENTE")).longValue());
             project.setCustomerName((String)r.get("NM_NOME"));
             project.setSkills(getSkillsByProjectId(((Number) r.get("NR_ID_PROJETO")).longValue()));
             projects.add(project);
@@ -123,20 +120,8 @@ public class ProjectDaoImpl implements ProjectDao {
                 project.setPrice(BigDecimal.ZERO);
             }
     
-            Number customerId = (Number) result.get("fk_nr_id_cliente");
-            if (customerId != null) {
-                var customer = userDao.userById(customerId.longValue());
-                project.setClient(new UserDto(customer.getName(), customer.getEmail()));
-            }
-    
-            Number freelancerId = (Number) result.get("fk_nr_id_freelancer");
-            if (freelancerId != null) {
-                var freelancer = userDao.userById(freelancerId.longValue());
-                project.setFreelancer(new UserDto(freelancer.getName(), freelancer.getEmail()));
-            } else {
-                project.setFreelancer(null);
-            }
-
+            project.setClientId(((Number) result.get("fk_nr_id_cliente")).longValue());
+            project.setFreelancerId(((Number) result.get("fk_nr_id_freelancer")).longValue());
             project.setSkills(getSkillsByProjectId(id));
     
             return project;
@@ -172,20 +157,8 @@ public class ProjectDaoImpl implements ProjectDao {
             } else {
                 project.setPrice(BigDecimal.ZERO);
             }
-
-            Number customerId = (Number) r.get("fk_nr_id_cliente");
-            if (customerId != null) {
-                var customer = userDao.userById(customerId.longValue());
-                project.setClient(new UserDto(customer.getName(), customer.getEmail()));
-            }
-    
-            Number freelancerId = (Number) r.get("fk_nr_id_freelancer");
-            if (freelancerId != null) {
-                var freelancer = userDao.userById(freelancerId.longValue());
-                project.setFreelancer(new UserDto(freelancer.getName(), freelancer.getEmail()));
-            } else {
-                project.setFreelancer(null);
-            }
+            project.setClientId(((Number) r.get("FK_NR_ID_CLIENTE")).longValue());
+            project.setFreelancerId(((Number) r.get("FK_NR_ID_FREELANCER")).longValue());
             project.setSkills(getSkillsByProjectId(((Number) r.get("NR_ID_PROJETO")).longValue()));
             projects.add(project);
         }
@@ -218,17 +191,8 @@ public class ProjectDaoImpl implements ProjectDao {
                 project.setPrice(BigDecimal.ZERO);
             }
 
-            Number customerId = (Number) r.get("fk_nr_id_cliente");
-            if (customerId != null) {
-                var customer = userDao.userById(customerId.longValue());
-                project.setClient(new UserDto(customer.getName(), customer.getEmail()));
-            }
-    
-            Number freelancerId = (Number) r.get("fk_nr_id_freelancer");
-            if (freelancerId != null) {
-                var freelancer = userDao.userById(freelancerId.longValue());
-                project.setFreelancer(new UserDto(freelancer.getName(), freelancer.getEmail()));
-            } 
+            project.setClientId(((Number) r.get("FK_NR_ID_CLIENTE")).longValue());
+            project.setFreelancerId(((Number) r.get("FK_NR_ID_FREELANCER")).longValue());
 
             project.setSkills(getSkillsByProjectId(((Number) r.get("NR_ID_PROJETO")).longValue()));
             projects.add(project);
@@ -297,16 +261,13 @@ public class ProjectDaoImpl implements ProjectDao {
     }
 
     @Override
-    public boolean checkStatusProject(Long idProject) {
+    public StatusProject checkStatusProject(Long idProject) {
 
         String query = "SELECT TP_STATUS FROM TB_PROJETO WHERE NR_ID_PROJETO = :idProject";
         SqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("idProject", idProject);
         String status = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, String.class);
 
-        if(status == null){
-            return false;
-        }
-        return status.equals("ABERTO");
+        return StatusProject.fromDescription(status);
     }
 
     @Override
@@ -317,7 +278,7 @@ public class ProjectDaoImpl implements ProjectDao {
             BigDecimal price = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, BigDecimal.class);
         
             if(price == null){
-                throw new RuntimeException("Projeto não encontrado");
+                throw new RuntimeException("Projeto nao encontrado");
             }
             return price;
         }catch(Exception e){

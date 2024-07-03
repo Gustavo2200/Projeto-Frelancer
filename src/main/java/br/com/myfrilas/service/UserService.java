@@ -1,5 +1,6 @@
 package br.com.myfrilas.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,9 +8,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import br.com.myfrilas.dao.freelancer.FreelancerDao;
 import br.com.myfrilas.dao.user.UserDao;
+import br.com.myfrilas.dto.freelancer.FreelancerDtoResponse;
+import br.com.myfrilas.dto.user.UserDtoResponse;
+import br.com.myfrilas.enums.TypeUser;
 import br.com.myfrilas.err.ErrResponse;
 import br.com.myfrilas.err.exceptions.FreelasException;
+import br.com.myfrilas.model.Transaction;
 import br.com.myfrilas.model.User;
 
 @Service
@@ -17,10 +23,12 @@ public class UserService {
 
     private UserDao userDao;
     private PasswordEncoder passwordEncoder;
+    private FreelancerDao freelancerDao;
 
-    public UserService(UserDao userDao, PasswordEncoder passwordEncoder) {
+    public UserService(UserDao userDao, PasswordEncoder passwordEncoder, FreelancerDao freelancerDao) {
         this.userDao = userDao;
         this.passwordEncoder = passwordEncoder;
+        this.freelancerDao = freelancerDao;
     }
 
     public void saveUser(User user) {
@@ -30,6 +38,42 @@ public class UserService {
         userDao.saveUser(user);
     }
     
+    public TypeUser typeUserById(Long id){
+        return userDao.typeUserById(id);
+    }
+     public FreelancerDtoResponse freelancerById(Long idFreelancer) {
+        User user = userDao.userById(idFreelancer);
+        if(user == null) {
+            throw new FreelasException("Usuario com esse id não encontrado", HttpStatus.NOT_FOUND.value());
+        }
+        return new FreelancerDtoResponse(user, freelancerDao.getSkillsByFreelancerId(idFreelancer), idFreelancer);
+    }
+
+    public UserDtoResponse customerById(Long idUser) {
+        User user = userDao.userById(idUser);
+        if(user == null) {
+            throw new FreelasException("Usuario com esse id não encontrado", HttpStatus.NOT_FOUND.value());
+        }
+        return new UserDtoResponse(user, idUser);
+    }
+
+    public List<Transaction> transfrerHistoryByCustomerId(Long idCustomer) {
+        return userDao.transfrerHistoryByCustomerId(idCustomer);
+    }
+
+    public List<Transaction> transfrerHistoryByFreelancerId(Long idFreelancer) {
+        return userDao.transfrerHistoryByFreelancerId(idFreelancer);
+    }
+
+    public BigDecimal getBalance(Long id) {
+        User user = userDao.userById(id);
+
+        if (user == null) {
+            throw new FreelasException("Usuario não encontrado", HttpStatus.NOT_FOUND.value());
+        }
+        return userDao.getBalance(id);
+    }
+
     private void checkBeforeSaving(User user) {
         List<ErrResponse> erros = new ArrayList<>();
 
