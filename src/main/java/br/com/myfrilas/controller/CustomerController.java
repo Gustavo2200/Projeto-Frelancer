@@ -99,5 +99,4 @@ public class CustomerController {
         customerService.depositBalance(Long.parseLong(userId), body.get("value"));
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    
 }

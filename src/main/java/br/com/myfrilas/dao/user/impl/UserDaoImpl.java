@@ -1,6 +1,9 @@
 package br.com.myfrilas.dao.user.impl;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,7 +15,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.myfrilas.dao.user.UserDao;
+import br.com.myfrilas.enums.TypeTransaction;
 import br.com.myfrilas.enums.TypeUser;
+import br.com.myfrilas.model.Transaction;
 import br.com.myfrilas.model.User;
 
 @Repository
@@ -106,6 +111,88 @@ public class UserDaoImpl implements UserDao {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+    @Override
+    public TypeUser typeUserById(Long id) {
+        String query = "SELECT TP_TIPO_USUARIO FROM TB_USUARIO WHERE NR_ID_USUARIO = :id";
+        SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("id", id);
+        String type = namedParameterJdbcTemplate.queryForObject(query, parameterSource, String.class);
+        
+        return TypeUser.fromDescription(type);
+    }
+
+    @Override
+    public List<Transaction> transfrerHistoryByCustomerId(Long idCustomer) {
+        String query = "SELECT * FROM TB_TRANSFERENCIA WHERE FK_ID_CLIENTE = :idCustomer";
+
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("idCustomer", idCustomer);
+
+        try{
+            var result = namedParameterJdbcTemplate.queryForList(query, sqlParameterSource);
+
+            List<Transaction> transactions = new ArrayList<>();
+            for(var r : result){
+                Transaction transaction = new Transaction();
+                transaction.setId(((Number) r.get("NR_ID_TRANSFERENCIA")).longValue());
+                transaction.setValue((BigDecimal) r.get("VL_VALOR"));
+                transaction.setDate(((Timestamp) r.get("DT_DATA")).toLocalDateTime());
+                transaction.setIdFreelancer(((Number) r.get("FK_ID_FREELANCER")).longValue());
+                transaction.setIdCustomer(((Number) r.get("FK_ID_CLIENTE")).longValue());
+                transaction.setType(TypeTransaction.fromDescription(r.get("TP_TIPO_TRANSACAO").toString()));
+                transactions.add(transaction);
+            }
+
+            return transactions;
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("Erro interno ao buscar historico de transferências");
+        }
+    }
+
+    @Override
+    public List<Transaction> transfrerHistoryByFreelancerId(Long idFreelancer) {
+        String query = "SELECT * FROM TB_TRANSFERENCIA WHERE FK_ID_FREELANCER = :idFreelancer";
+
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("idFreelancer", idFreelancer);
+        try{
+            var result = namedParameterJdbcTemplate.queryForList(query, sqlParameterSource);
+
+            List<Transaction> transactions = new ArrayList<>();
+            for(var r : result){
+                Transaction transaction = new Transaction();
+                transaction.setId(((Number) r.get("NR_ID_TRANSFERENCIA")).longValue());
+                transaction.setValue((BigDecimal) r.get("VL_VALOR"));
+                transaction.setDate(((Timestamp) r.get("DT_DATA")).toLocalDateTime());
+
+                transaction.setIdFreelancer(((Number) r.get("FK_ID_FREELANCER")).longValue());
+                transaction.setIdCustomer(((Number) r.get("FK_ID_CLIENTE")).longValue());
+
+                transaction.setType(TypeTransaction.fromDescription(r.get("TP_TIPO_TRANSACAO").toString()));
+                transactions.add(transaction);
+            }
+
+            return transactions;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("Erro interno ao buscar historico de transferências");
+            
+        }
+    }
+
+    @Override
+    public BigDecimal getBalance(Long id) {
+        String query = "SELECT VL_SALDO FROM TB_USUARIO WHERE NR_ID_USUARIO = :id";
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("id", id);
+        try{
+            BigDecimal balance = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, BigDecimal.class);
+            return balance;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("Erro interno ao buscar saldo");
+            
         }
     }
 }

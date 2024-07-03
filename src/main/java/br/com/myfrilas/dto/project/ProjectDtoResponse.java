@@ -9,17 +9,19 @@ public class ProjectDtoResponse {
     private Long id;
     private String title;
     private String description;
+    private Long customerId;
     private String customerName;
     private StatusProject status;
     private List<String> skills;
     
     public ProjectDtoResponse() {}
 
-    public ProjectDtoResponse(Long id, String title, String description, String customerName, 
+    public ProjectDtoResponse(Long id, String title, String description, Long customerId, String customerName, 
                 StatusProject status, List<String> skills) {
         this.id = id;
         this.title = title;
         this.description = description;
+        this.customerId = customerId;
         this.customerName = customerName;
         this.status = status;
         this.skills = skills;
@@ -62,6 +64,14 @@ public class ProjectDtoResponse {
 
     public void setSkills(List<String> skills) {
         this.skills = skills;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
     }
     
 }

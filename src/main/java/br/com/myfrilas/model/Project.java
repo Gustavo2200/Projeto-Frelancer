@@ -3,7 +3,6 @@ package br.com.myfrilas.model;
 import java.math.BigDecimal;
 import java.util.List;
 
-import br.com.myfrilas.dto.user.UserDto;
 import br.com.myfrilas.enums.StatusProject;
 
 public class Project {
@@ -12,22 +11,22 @@ public class Project {
     private String title;
     private String description;
     private BigDecimal price;
-    private UserDto client; 
-    private UserDto freelancer;
+    private Long clientId; 
+    private Long freelancerId;
     private StatusProject status;
     private List<String> necessarySkills;
 
     public Project() {}
     
-    public Project(Long id, String title, String description, BigDecimal price, UserDto client, UserDto freelancer,
+    public Project(Long id, String title, String description, BigDecimal price, Long clientId, Long freelancerId,
             StatusProject status, List<String> necessarySkills ) {
 
         this.id = id;
         this.title = title;
         this.description = description;
         this.price = price;
-        this.client = client;
-        this.freelancer = freelancer;
+        this.clientId = clientId;
+        this.freelancerId = freelancerId;
         this.status = status;
         this.necessarySkills = necessarySkills;
     }
@@ -57,17 +56,17 @@ public class Project {
     public void setPrice(BigDecimal price) {
         this.price = price;
     }
-    public UserDto getClient() {
-        return client;
+    public Long getClientId() {
+        return clientId;
     }
-    public void setClient(UserDto client) {
-        this.client = client;
+    public void setClientId(Long clientId) {
+        this.clientId = clientId;
     }
-    public UserDto getFreelancer() {
-        return freelancer;
+    public Long getFreelancerId() {
+        return freelancerId;
     }
-    public void setFreelancer(UserDto freelancer) {
-        this.freelancer = freelancer;
+    public void setFreelancerId(Long freelancerId) {
+        this.freelancerId = freelancerId;
     }
     public StatusProject getStatus() {
         return status;

@@ -10,7 +10,6 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import br.com.myfrilas.dao.freelancer.FreelancerDao;
-import br.com.myfrilas.dto.freelancer.FreelancerDtoResponse;
 import br.com.myfrilas.dto.proposal.ProposalDtoRequest;
 import br.com.myfrilas.err.exceptions.FreelasException;
 
@@ -81,24 +80,6 @@ public class FreelancerDaoImpl implements FreelancerDao{
     }
 
     @Override
-    public FreelancerDtoResponse freelancerById(Long idFreelancer) {
-        String query = "SELECT * FROM TB_USUARIO WHERE NR_ID_USUARIO = :userId";
-        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("userId", idFreelancer);
-
-        var result = namedParameterJdbcTemplate.queryForMap(query, namedParameters);
-
-        FreelancerDtoResponse freelancer = new FreelancerDtoResponse();
-        freelancer.setId(((Number) result.get("NR_ID_USUARIO")).longValue());
-        freelancer.setName((String) result.get("NM_NOME"));
-        freelancer.setEmail((String) result.get("DS_EMAIL"));
-        freelancer.setCpf((String) result.get("NR_CPF"));
-        freelancer.setPhone((String) result.get("NR_TELEFONE"));
-        freelancer.setSkills(getSkillsByFreelancerId(idFreelancer));
-        return freelancer;
-        
-    }
-
-    @Override
     public void sendProposal(ProposalDtoRequest proposal, Long idFreelancer) {
         String query = "INSERT INTO TB_PROPOSTA (FK_ID_FREELANCER, FK_ID_PROJETO, NM_COMENTARIO, VL_VALOR) " +
                 "VALUES (:idFreelancer, :idProject, :comment, :value)";
@@ -112,7 +93,8 @@ public class FreelancerDaoImpl implements FreelancerDao{
         namedParameterJdbcTemplate.update(query, namedParameters);
     }
     
-    private List<String> getSkillsByFreelancerId(Long idFreelancer){
+    @Override
+    public List<String> getSkillsByFreelancerId(Long idFreelancer){
         String query = "SELECT nm_skill_name FROM TB_SKILL s " +
                        "JOIN TB_FREELANCER_SKILLS psk ON s.nr_id_skill = psk.fk_id_skill " +
                        "WHERE psk.fk_id_freelancer = :idFreelancer";

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.myfrilas.dao.customer.CustomerDao;
 import br.com.myfrilas.dao.project.ProjectDao;
+import br.com.myfrilas.enums.StatusProject;
 import br.com.myfrilas.err.exceptions.FreelasException;
 import br.com.myfrilas.model.Proposal;
 
@@ -53,12 +54,16 @@ public class CustomerService {
     public void completeProject(Long idProject, Long idCustomer) {
 
         validadeCustomer(idCustomer, idProject);
+
+        if(projectDao.checkStatusProject(idProject).getType() != StatusProject.IN_PROGRESS.getType()) {
+            throw new FreelasException("Voce so pode concluir projetos que estejam em andamento", HttpStatus.FORBIDDEN.value());
+        }
+
         BigDecimal valueProject = projectDao.priceByProjectId(idProject);
 
         if(!customerDao.checkBalanceCustomer(idCustomer, valueProject)){
             throw new FreelasException("Seu saldo é insuficiente", HttpStatus.BAD_REQUEST.value());
         }
-
         customerDao.completeProject(idProject);
     }
 
