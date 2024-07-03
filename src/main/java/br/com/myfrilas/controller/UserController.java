@@ -57,17 +57,9 @@ public class UserController {
     public ResponseEntity<?> transferHistory(@RequestHeader ("Authorization") String token){
     
         DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7));
-
-        String role = decodedJWT.getClaim("role").asString();
         Long id = Long.parseLong(decodedJWT.getClaim("user_id").asString());
 
-        if("CUSTOMER".equals(role)) {
-            return new ResponseEntity<>(userService.transfrerHistoryByCustomerId(id), HttpStatus.OK);
-        }
-        else if("FREELANCER".equals(role)) {
-            return new ResponseEntity<>(userService.transfrerHistoryByFreelancerId(id), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(userService.transfrerHistoryByUserId(id), HttpStatus.OK);
     }
 
     @GetMapping("/balance")

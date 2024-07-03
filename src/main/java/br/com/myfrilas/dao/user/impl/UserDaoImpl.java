@@ -123,11 +123,11 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public List<Transaction> transfrerHistoryByCustomerId(Long idCustomer) {
-        String query = "SELECT * FROM TB_TRANSFERENCIA WHERE FK_ID_CLIENTE = :idCustomer";
+    public List<Transaction> transfrerHistoryByUserId(Long idUser) {
+        String query = "SELECT * FROM TB_TRANSFERENCIA WHERE FK_ID_PAGADOR = :idUser OR FK_ID_BENEFICIARIO = :idUser";
 
         SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                .addValue("idCustomer", idCustomer);
+                .addValue("idUser", idUser);
 
         try{
             var result = namedParameterJdbcTemplate.queryForList(query, sqlParameterSource);
@@ -138,8 +138,16 @@ public class UserDaoImpl implements UserDao {
                 transaction.setId(((Number) r.get("NR_ID_TRANSFERENCIA")).longValue());
                 transaction.setValue((BigDecimal) r.get("VL_VALOR"));
                 transaction.setDate(((Timestamp) r.get("DT_DATA")).toLocalDateTime());
-                transaction.setIdFreelancer(((Number) r.get("FK_ID_FREELANCER")).longValue());
-                transaction.setIdCustomer(((Number) r.get("FK_ID_CLIENTE")).longValue());
+
+                Long idPayer = ((Number) r.get("FK_ID_PAGADOR")).longValue();
+                if(idPayer == idUser){
+                    transaction.setEntryOrExit("Saida");
+                }else{
+                    transaction.setEntryOrExit("Entrada");
+                }
+                transaction.setIdPayer(idPayer);
+                transaction.setIdRecipient(((Number) r.get("FK_ID_BENEFICIARIO")).longValue());
+                transaction.setIdPayer(((Number) r.get("FK_ID_PAGADOR")).longValue());
                 transaction.setType(TypeTransaction.fromDescription(r.get("TP_TIPO_TRANSACAO").toString()));
                 transactions.add(transaction);
             }
@@ -148,37 +156,6 @@ public class UserDaoImpl implements UserDao {
         }catch (Exception e){
             e.printStackTrace();
             throw new RuntimeException("Erro interno ao buscar historico de transferências");
-        }
-    }
-
-    @Override
-    public List<Transaction> transfrerHistoryByFreelancerId(Long idFreelancer) {
-        String query = "SELECT * FROM TB_TRANSFERENCIA WHERE FK_ID_FREELANCER = :idFreelancer";
-
-        SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                .addValue("idFreelancer", idFreelancer);
-        try{
-            var result = namedParameterJdbcTemplate.queryForList(query, sqlParameterSource);
-
-            List<Transaction> transactions = new ArrayList<>();
-            for(var r : result){
-                Transaction transaction = new Transaction();
-                transaction.setId(((Number) r.get("NR_ID_TRANSFERENCIA")).longValue());
-                transaction.setValue((BigDecimal) r.get("VL_VALOR"));
-                transaction.setDate(((Timestamp) r.get("DT_DATA")).toLocalDateTime());
-
-                transaction.setIdFreelancer(((Number) r.get("FK_ID_FREELANCER")).longValue());
-                transaction.setIdCustomer(((Number) r.get("FK_ID_CLIENTE")).longValue());
-
-                transaction.setType(TypeTransaction.fromDescription(r.get("TP_TIPO_TRANSACAO").toString()));
-                transactions.add(transaction);
-            }
-
-            return transactions;
-        }catch(Exception e){
-            e.printStackTrace();
-            throw new RuntimeException("Erro interno ao buscar historico de transferências");
-            
         }
     }
 

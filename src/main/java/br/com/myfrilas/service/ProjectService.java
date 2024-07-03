@@ -50,6 +50,10 @@ public class ProjectService {
 
     public void deleteProject(Long idProject, Long idCustomer) {
         checkBeforeUpdate(idProject, idCustomer);
+        StatusProject statusProject = projectDao.checkStatusProject(idProject);
+        if(statusProject.equals(StatusProject.IN_PROGRESS)){
+            throw new FreelasException("Para deletar projetos em andamento, contate o administrador", HttpStatus.FORBIDDEN.value());
+        }
         projectDao.deleteProjectById(idProject);
     }
 
