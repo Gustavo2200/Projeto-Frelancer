@@ -57,12 +57,8 @@ public class UserService {
         return new UserDtoResponse(user, idUser);
     }
 
-    public List<Transaction> transfrerHistoryByCustomerId(Long idCustomer) {
-        return userDao.transfrerHistoryByCustomerId(idCustomer);
-    }
-
-    public List<Transaction> transfrerHistoryByFreelancerId(Long idFreelancer) {
-        return userDao.transfrerHistoryByFreelancerId(idFreelancer);
+    public List<Transaction> transfrerHistoryByUserId(Long idUser) {
+        return userDao.transfrerHistoryByUserId(idUser);
     }
 
     public BigDecimal getBalance(Long id) {

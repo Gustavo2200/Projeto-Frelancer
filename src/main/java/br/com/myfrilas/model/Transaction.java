@@ -10,25 +10,28 @@ import br.com.myfrilas.enums.TypeTransaction;
 public class Transaction {
     
     private Long id;
-    private Long idCustomer;
-    private Long idFreelancer;
+    private String entryOrExit;
+    private Long idPayer;
+    private Long idRecipient;
     private BigDecimal value;
 
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime date;
 
     private TypeTransaction type;
+    
 
     public Transaction() {}
 
-    public Transaction(Long id, Long idCustomer, Long idFreelancer, BigDecimal value,
-             LocalDateTime date, TypeTransaction type) {
+    public Transaction(Long id, Long idPayer, Long idRecipient, BigDecimal value,
+             LocalDateTime date, TypeTransaction type, String entryOrExit) {
         this.id = id;
-        this.idCustomer = idCustomer;
-        this.idFreelancer = idFreelancer;
+        this.idPayer = idPayer;
+        this.idRecipient = idRecipient;
         this.value = value;
         this.date = date;
         this.type = type;
+        this.entryOrExit = entryOrExit;
     }
 
     public Long getId() {
@@ -39,20 +42,20 @@ public class Transaction {
         this.id = id;
     }
 
-    public Long getIdCustomer() {
-        return idCustomer;
+    public Long getIdPayer() {
+        return idPayer;
     }
 
-    public void setIdCustomer(Long idCustomer) {
-        this.idCustomer = idCustomer;
+    public void setIdPayer(Long idPayer) {
+        this.idPayer = idPayer;
     }
 
-    public Long getIdFreelancer() {
-        return idFreelancer;
+    public Long getIdRecipient() {
+        return idRecipient;
     }
 
-    public void setIdFreelancer(Long idFreelancer) {
-        this.idFreelancer = idFreelancer;
+    public void setIdRecipient(Long idRecipient) {
+        this.idRecipient = idRecipient;
     }
 
     public BigDecimal getValue() {
@@ -77,6 +80,14 @@ public class Transaction {
 
     public void setType(TypeTransaction type) {
         this.type = type;
+    }
+
+    public String getEntryOrExit() {
+        return entryOrExit;
+    }
+
+    public void setEntryOrExit(String entryOrExit) {
+        this.entryOrExit = entryOrExit;
     }
     
 }

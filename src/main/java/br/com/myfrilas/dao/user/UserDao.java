@@ -17,7 +17,6 @@ public interface UserDao {
     boolean checkPhoneExists(String phone);
     Map<String, Object> getUser(String email);
     TypeUser typeUserById(Long id);
-    List<Transaction> transfrerHistoryByCustomerId(Long idCustomer);
-    List<Transaction> transfrerHistoryByFreelancerId(Long idFreelancer);
+    List<Transaction> transfrerHistoryByUserId(Long idUser);
     BigDecimal getBalance(Long id);
 }

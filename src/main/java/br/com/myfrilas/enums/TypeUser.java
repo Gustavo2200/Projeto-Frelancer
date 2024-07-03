@@ -2,7 +2,9 @@ package br.com.myfrilas.enums;
 
 public enum TypeUser {
     CUSTOMER(0, "CUSTOMER"),
-    FREELANCER(1, "FREELANCER");
+    FREELANCER(1, "FREELANCER"),
+    ADMIN(2, "ADMIN");
+    
 
     private int type;
     private String description;

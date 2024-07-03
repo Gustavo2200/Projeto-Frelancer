@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/get-token").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/save-user").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user/save-user").permitAll()
                         .anyRequest().authenticated())
                 .cors(cors -> cors.disable())
                 .addFilterBefore(filterJwt, UsernamePasswordAuthenticationFilter.class)

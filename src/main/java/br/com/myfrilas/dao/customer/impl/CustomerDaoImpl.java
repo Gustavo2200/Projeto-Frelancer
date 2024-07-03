@@ -16,6 +16,9 @@ import br.com.myfrilas.model.Proposal;
 @Repository
 public class CustomerDaoImpl implements CustomerDao{
 
+    private final BigDecimal TAXA = new BigDecimal(3);
+    private final Long idAdmin = 9L;
+
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public CustomerDaoImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
@@ -77,9 +80,12 @@ public class CustomerDaoImpl implements CustomerDao{
 
     @Override
     public void completeProject(Long idProject) {
-        String query = "SELECT COMPLETE_PROJECT(:idProject)";
+        String query = "SELECT COMPLETE_PROJECT(:idProject, :idAdmin, :taxa)";
 
-        SqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("idProject", idProject);
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("idProject", idProject)
+                .addValue("idAdmin", idAdmin)
+                .addValue("taxa", TAXA);
 
         try{
             namedParameterJdbcTemplate.execute(query, sqlParameterSource, (PreparedStatementCallback<Object>) ps ->{
