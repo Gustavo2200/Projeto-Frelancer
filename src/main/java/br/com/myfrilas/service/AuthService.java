@@ -34,7 +34,7 @@ public class AuthService {
         Map<String, Object> dataAuthentication = userDao.getUser(loguinDto.getEmail());
 
         if (dataAuthentication == null) {
-            throw new FreelasException("Login inválido", HttpStatus.UNAUTHORIZED.value());
+            throw new FreelasException("Email nâo encontrado", HttpStatus.NOT_FOUND.value());
         }
 
         String passwordFromDb = (String) dataAuthentication.get("DS_SENHA");
