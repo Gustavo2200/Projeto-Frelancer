@@ -48,10 +48,18 @@ public class ProjectService {
         return projectDao.getProjectById(id);
     }
 
-    public void deleteProject(Long idProject, Long idCustomer) {
-        checkBeforeUpdate(idProject, idCustomer);
+    public void deleteProject(Long idProject, Long idCustomer, String roleUser) {
+        if(!roleUser.equals("ADMIN")) {
+            checkBeforeUpdate(idProject, idCustomer);
+        }
+        else{
+            if(!projectDao.checkProjectExists(idProject)) {
+                throw new FreelasException("Projeto não encontrado", HttpStatus.NOT_FOUND.value());
+            }
+        }
+        
         StatusProject statusProject = projectDao.checkStatusProject(idProject);
-        if(statusProject.equals(StatusProject.IN_PROGRESS)){
+        if(statusProject.equals(StatusProject.IN_PROGRESS) && !roleUser.equals("ADMIN")) {
             throw new FreelasException("Para deletar projetos em andamento, contate o administrador", HttpStatus.FORBIDDEN.value());
         }
         projectDao.deleteProjectById(idProject);

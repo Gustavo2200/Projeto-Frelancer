@@ -2,15 +2,15 @@ package br.com.myfrilas.model;
 
 public class Skill {
     
-    private String Skill;
+    private String skill;
 
     public Skill() {}
-    public Skill(String skill) { this.Skill = skill; }
+    public Skill(String skill) { this.skill = skill; }
 
     public String getSkill() {
-        return Skill;
+        return skill;
     }
     public void setSkill(String skill) {
-        Skill = skill;
+        this.skill = skill;
     }
 }

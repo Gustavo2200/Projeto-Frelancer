@@ -90,7 +90,7 @@ public class ProjectController {
             throw new FreelasException("Acesso nao permitido a Freelancers", HttpStatus.UNAUTHORIZED.value());
         }
         String userId = decodedJWT.getClaim("user_id").asString(); 
-        projectService.deleteProject(id, Long.parseLong(userId));
+        projectService.deleteProject(id, Long.parseLong(userId), role);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
