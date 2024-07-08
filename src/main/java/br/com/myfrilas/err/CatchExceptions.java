@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,5 +49,14 @@ public class CatchExceptions extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(new ErrResponse(ex.getMessage(),ex.getStatus(),request.getRequestURI(),
         LocalDateTime.now().toString()),
         HttpStatus.valueOf(ex.getStatus()));
-}
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+                                                                  HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = "Tipo de dado invalido, por favor verifique e tente novamente";
+        ErrResponse errResponse = new ErrResponse(message, HttpStatus.BAD_REQUEST.value(),
+                ((ServletWebRequest) request).getRequest().getRequestURI(), LocalDateTime.now().toString());
+        return new ResponseEntity<>(errResponse, HttpStatus.BAD_REQUEST);
+    }
 }

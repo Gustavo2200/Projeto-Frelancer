@@ -30,8 +30,13 @@ public class FreelancerDaoImpl implements FreelancerDao{
         SqlParameterSource namedParameters = new MapSqlParameterSource()
                 .addValue("idFreelancer", idFreelancer)
                 .addValue("idSkill", idSkill);
-                
-        namedParameterJdbcTemplate.update(query, namedParameters);
+
+        try{
+            namedParameterJdbcTemplate.update(query, namedParameters);
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao salvar skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
         }
     }
 
@@ -44,7 +49,12 @@ public class FreelancerDaoImpl implements FreelancerDao{
                 .addValue("idFreelancer", idFreelancer)
                 .addValue("idSkill", idSkill);
 
-        namedParameterJdbcTemplate.update(query, namedParameters);
+        try{
+            namedParameterJdbcTemplate.update(query, namedParameters);
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao deletar skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
         }
     }
 
@@ -89,8 +99,12 @@ public class FreelancerDaoImpl implements FreelancerDao{
                 .addValue("idProject", proposal.getIdProject())
                 .addValue("comment", proposal.getComment())
                 .addValue("value", proposal.getValue());
-
-        namedParameterJdbcTemplate.update(query, namedParameters);
+        try{
+            namedParameterJdbcTemplate.update(query, namedParameters);
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao enviar proposta", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
     
     @Override
@@ -100,14 +114,18 @@ public class FreelancerDaoImpl implements FreelancerDao{
                        "WHERE psk.fk_id_freelancer = :idFreelancer";
 
         SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("idFreelancer", idFreelancer);
+        try{
+            var result = namedParameterJdbcTemplate.queryForList(query, namedParameters);
 
-        var result = namedParameterJdbcTemplate.queryForList(query, namedParameters);
-
-        List<String> skills = new ArrayList<>();
-        for(var r : result){
-            skills.add(r.get("nm_skill_name").toString());
+            List<String> skills = new ArrayList<>();
+            for(var r : result){
+                skills.add(r.get("nm_skill_name").toString());
+            }
+            return skills;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao buscar skills", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
-        return skills;
      }
 
 }
