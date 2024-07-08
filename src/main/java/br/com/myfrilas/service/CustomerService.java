@@ -33,21 +33,21 @@ public class CustomerService {
     }
 
     public void rejectProposal(Long idProposal, Long idCustomer) {
-        Long idProject = customerDao.idProjectByIdProposal(idProposal);
-
-        validadeCustomer(idCustomer, idProject);
         if(!customerDao.checkProposalExists(idProposal)) {
             throw new FreelasException("Proposta nao encontrada", HttpStatus.NOT_FOUND.value());
         }
+        Long idProject = customerDao.idProjectByIdProposal(idProposal);
+
+        validadeCustomer(idCustomer, idProject);
         customerDao.rejectProposal(idProposal);
     }
 
     public void acceptProposal(Long idProposal, Long idCustomer) {
-        Long idProject = customerDao.idProjectByIdProposal(idProposal);
-        validadeCustomer(idCustomer, idProject);
         if(!customerDao.checkProposalExists(idProposal)) {
             throw new FreelasException("Proposta nao encontrada", HttpStatus.NOT_FOUND.value());
         }
+        Long idProject = customerDao.idProjectByIdProposal(idProposal);
+        validadeCustomer(idCustomer, idProject);
         customerDao.acceptProposal(idProposal);
     }
 
@@ -78,7 +78,7 @@ public class CustomerService {
         }
 
         else if(idCustomer != projectDao.customerIdByProjectId(idProject)){
-            throw new FreelasException("Voce so pode ver propostas do seu projeto", HttpStatus.BAD_REQUEST.value());
+            throw new FreelasException("Voce so pode gerenciar propostas do seu projeto", HttpStatus.BAD_REQUEST.value());
         }
     }
 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import br.com.myfrilas.dao.user.UserDao;
 import br.com.myfrilas.enums.TypeTransaction;
 import br.com.myfrilas.enums.TypeUser;
+import br.com.myfrilas.err.exceptions.FreelasException;
 import br.com.myfrilas.model.Transaction;
 import br.com.myfrilas.model.User;
 
@@ -49,7 +51,7 @@ public class UserDaoImpl implements UserDao {
             jdbcCall.execute(sqlParameterSource);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Erro interno ao salvar usuário");
+            throw new FreelasException("Erro interno ao salvar usuário", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
     @Override
@@ -69,36 +71,47 @@ public class UserDaoImpl implements UserDao {
             return user;
         }catch (Exception e){
             e.printStackTrace();
-            throw new RuntimeException("Erro interno ao buscar usuário");
+            throw new FreelasException("Erro interno ao buscar usuário", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
-    }
-
-    private SimpleJdbcCall createJdbcCall(String functionName) {
-        return new SimpleJdbcCall(jdbcTemplate).withFunctionName(functionName);
     }
 
     @Override
     public boolean checkCpfExists(String cpf) {
         String querry = "SELECT COUNT(1) FROM TB_USUARIO WHERE NR_CPF = :cpf";  //parametro nomeado :cpf sera substituido por cpf
         SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("cpf", cpf);
-        Integer count = namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Integer.class);
-        return count != null && count > 0;
+        try{
+            Integer count = namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Integer.class);
+            return count != null && count > 0;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao buscar cpf", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 
     @Override
     public boolean checkEmailExists(String email) {
         String querry = "SELECT COUNT(1) FROM TB_USUARIO WHERE DS_EMAIL = :email";
         SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("email", email);
-        Integer count = namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Integer.class);
-        return count != null && count > 0;
+        try{
+            Integer count = namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Integer.class);
+            return count != null && count > 0;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao buscar email", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 
     @Override
     public boolean checkPhoneExists(String phone) {
         String querry = "SELECT COUNT(1) FROM TB_USUARIO WHERE NR_TELEFONE = :phone"; 
         SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("phone", phone);
-        Integer count = namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Integer.class);
-        return count != null && count > 0;
+        try{
+            Integer count = namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Integer.class);
+            return count != null && count > 0;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao buscar telefone", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 
     @Override
@@ -110,16 +123,21 @@ public class UserDaoImpl implements UserDao {
             return namedParameterJdbcTemplate.queryForMap(query, parameters);
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            throw new FreelasException("Erro interno ao buscar usuário", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
     @Override
     public TypeUser typeUserById(Long id) {
         String query = "SELECT TP_TIPO_USUARIO FROM TB_USUARIO WHERE NR_ID_USUARIO = :id";
         SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("id", id);
-        String type = namedParameterJdbcTemplate.queryForObject(query, parameterSource, String.class);
+        try{
+            String type = namedParameterJdbcTemplate.queryForObject(query, parameterSource, String.class);
         
-        return TypeUser.fromDescription(type);
+            return TypeUser.fromDescription(type);
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao buscar tipo de usuário", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 
     @Override
@@ -155,7 +173,7 @@ public class UserDaoImpl implements UserDao {
             return transactions;
         }catch (Exception e){
             e.printStackTrace();
-            throw new RuntimeException("Erro interno ao buscar historico de transferências");
+            throw new FreelasException("Erro interno ao buscar historico de transferências", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
@@ -168,8 +186,11 @@ public class UserDaoImpl implements UserDao {
             return balance;
         }catch(Exception e){
             e.printStackTrace();
-            throw new RuntimeException("Erro interno ao buscar saldo");
+            throw new FreelasException("Erro interno ao buscar saldo", HttpStatus.INTERNAL_SERVER_ERROR.value());
             
         }
+    }
+    private SimpleJdbcCall createJdbcCall(String functionName) {
+        return new SimpleJdbcCall(jdbcTemplate).withFunctionName(functionName);
     }
 }

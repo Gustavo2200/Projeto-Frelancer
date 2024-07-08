@@ -31,28 +31,18 @@ public class SkillService {
     }
 
     public void deleteSkill(Long idSkill) {
-        try{
-            SkillDto skill = skillDao.getSkillById(idSkill);
-            if(skill == null){
-                throw new FreelasException("Skill nao existe", HttpStatus.NOT_FOUND.value());
+            if(skillDao.getSkillById(idSkill) == null){
+                throw new FreelasException("Skill não encontrada", HttpStatus.NOT_FOUND.value());
             }
             skillDao.deleteSkill(idSkill);
-        }catch(Exception e){
-            throw new FreelasException("Erro interno ao deletar a skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
     }
 
     public void updateSkill(SkillDto skillDto) {
-
-        try{
-            SkillDto skill = skillDao.getSkillById(skillDto.getId());
-            if(skill == null){
-                throw new FreelasException("Skill nao existe", HttpStatus.NOT_FOUND.value());
+            if(skillDao.getSkillById(skillDto.getId()) == null){
+                throw new FreelasException("Skill não encontrada", HttpStatus.NOT_FOUND.value());
             }
+            
             skillDao.updateSkill(skillDto);
-        }catch(Exception e){
-            throw new FreelasException("Erro interno ao atualizar a skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
 
         
     }

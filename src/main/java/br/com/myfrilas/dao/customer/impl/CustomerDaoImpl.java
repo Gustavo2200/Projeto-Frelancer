@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -11,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import br.com.myfrilas.dao.customer.CustomerDao;
+import br.com.myfrilas.err.exceptions.FreelasException;
 import br.com.myfrilas.model.Proposal;
 
 @Repository
@@ -45,7 +47,7 @@ public class CustomerDaoImpl implements CustomerDao{
             return proposals;
         }catch(Exception e){
             e.printStackTrace();
-            throw new RuntimeException("Erro interno ao buscar propostas", e);
+            throw new FreelasException("Erro interno ao buscar propostas", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
     @Override
@@ -61,7 +63,7 @@ public class CustomerDaoImpl implements CustomerDao{
            });
        }catch(Exception e){
         e.printStackTrace();
-        throw new RuntimeException("Erro interno ao aceitar proposta", e);
+        throw new FreelasException("Erro interno ao aceitar proposta", HttpStatus.INTERNAL_SERVER_ERROR.value());
        }
     }
 
@@ -74,7 +76,7 @@ public class CustomerDaoImpl implements CustomerDao{
             namedParameterJdbcTemplate.update(query, sqlParameterSource);
         }catch(Exception e){
             e.printStackTrace();
-            throw new RuntimeException("Erro interno ao rejeitar proposta", e);
+            throw new FreelasException("Erro interno ao rejeitar proposta", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
@@ -94,7 +96,7 @@ public class CustomerDaoImpl implements CustomerDao{
             });
         }catch(Exception e){
             e.printStackTrace();
-            throw new RuntimeException("Erro interno ao concluir projeto", e);
+            throw new FreelasException("Erro interno ao concluir projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
@@ -108,7 +110,7 @@ public class CustomerDaoImpl implements CustomerDao{
             return count != null && count > 0;
         }catch(Exception e){
             e.printStackTrace();
-            throw new RuntimeException("Erro interno ao buscar proposta", e);
+            throw new FreelasException("Erro interno ao buscar proposta", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
@@ -129,7 +131,7 @@ public class CustomerDaoImpl implements CustomerDao{
         
         }catch(Exception e){
             e.printStackTrace();
-            throw new RuntimeException("Erro checar saldo", e);
+            throw new FreelasException("Erro checar saldo", HttpStatus.INTERNAL_SERVER_ERROR.value());    
         }
     }
 
@@ -143,7 +145,7 @@ public class CustomerDaoImpl implements CustomerDao{
             return idProject;
         }catch(Exception e){
             e.printStackTrace();
-            throw new RuntimeException("Erro interno ao buscar proposta", e);
+            throw new FreelasException("Erro interno ao buscar proposta", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
@@ -158,7 +160,7 @@ public class CustomerDaoImpl implements CustomerDao{
             namedParameterJdbcTemplate.update(query, sqlParameterSource);
         }catch(Exception e){
             e.printStackTrace();
-            throw new RuntimeException("Erro interno ao depositar saldo", e);
+            throw new FreelasException("Erro interno ao depositar saldo", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
     

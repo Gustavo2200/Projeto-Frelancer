@@ -1,6 +1,4 @@
 package br.com.myfrilas.controller;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,22 +93,20 @@ public class ProjectController {
     }
 
     @GetMapping("/my-projects")
+    public ResponseEntity<?> listProjectsByUserId(@RequestHeader("Authorization") String token) {
+
+        DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7));
+        String userId = decodedJWT.getClaim("user_id").asString();
+        return new ResponseEntity<>(projectService.listProjectsByUserId(Long.parseLong(userId)), HttpStatus.OK);
+    }
+
+    @GetMapping("/my-projectsBy")
     public ResponseEntity<?> listProjectsByUserId(@RequestHeader("Authorization") String token,
                 @RequestParam("status") String status) {
 
         DecodedJWT decodedJWT = tokenUtils.verifyToken(token.substring(7));
         String userId = decodedJWT.getClaim("user_id").asString();
-        String role = decodedJWT.getClaim("role").asString();
-
-        List<Project> projects = new ArrayList<>();
-
-        if("FREELANCER".equals(role)) {
-            projects = projectService.listProjectsByFreelancerId(Long.parseLong(userId), status);
-        }
-        else if("CUSTOMER".equals(role)) {
-            projects = projectService.listProjectsByCustomerId(Long.parseLong(userId), status);
-        }
-        return new ResponseEntity<>(projects, HttpStatus.OK);
+        return new ResponseEntity<>(projectService.listProjectsByUSerIdAndStatus(Long.parseLong(userId), status), HttpStatus.OK);
     }
 
     @PostMapping("/add-skill")

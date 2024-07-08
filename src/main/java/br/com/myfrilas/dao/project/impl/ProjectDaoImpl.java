@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.stereotype.Repository;
@@ -17,6 +18,7 @@ import br.com.myfrilas.dto.project.ProjectDtoRequest;
 import br.com.myfrilas.dto.project.ProjectDtoResponse;
 import br.com.myfrilas.dto.project.UpdateProjectDtoRequest;
 import br.com.myfrilas.enums.StatusProject;
+import br.com.myfrilas.err.exceptions.FreelasException;
 import br.com.myfrilas.model.Project;
 
 @Repository
@@ -44,29 +46,34 @@ public class ProjectDaoImpl implements ProjectDao {
             jdbcCall.execute(sqlParameterSource);
         }catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Erro interno ao salvar o projeto");
+            throw new FreelasException("Erro interno ao salvar o projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
     @Override
     public List<ProjectDtoResponse> listProjectsByStatus(String status) {
         String query = "SELECT NR_ID_PROJETO, NM_TITULO, NM_DESCRICAO, TP_STATUS, FK_NR_ID_CLIENTE, TB_USUARIO.NM_NOME FROM TB_PROJETO \r\n" + //
-                        "JOIN TB_USUARIO ON FK_NR_ID_CLIENTE = NR_ID_USUARIO WHERE TP_STATUS = ?"; 
-        
-        var result = jdbcTemplate.queryForList(query, status);
-        List<ProjectDtoResponse> projects = new ArrayList<>();
-        for(var r: result){
-            ProjectDtoResponse project = new ProjectDtoResponse();
-            project.setId(((Number)r.get("NR_ID_PROJETO")).longValue());
-            project.setTitle((String)r.get("NM_TITULO"));
-            project.setDescription((String)r.get("NM_DESCRICAO"));
-            project.setStatus(StatusProject.fromDescription((String)r.get("TP_STATUS")));
-            project.setCustomerId(((Number)r.get("FK_NR_ID_CLIENTE")).longValue());
-            project.setCustomerName((String)r.get("NM_NOME"));
-            project.setSkills(getSkillsByProjectId(((Number) r.get("NR_ID_PROJETO")).longValue()));
-            projects.add(project);
+                        "JOIN TB_USUARIO ON FK_NR_ID_CLIENTE = NR_ID_USUARIO WHERE TP_STATUS = ? "+
+                        "ORDER BY NR_ID_PROJETO"; 
+        try{
+            var result = jdbcTemplate.queryForList(query, status);
+            List<ProjectDtoResponse> projects = new ArrayList<>();
+            for(var r: result){
+                ProjectDtoResponse project = new ProjectDtoResponse();
+                project.setId(((Number)r.get("NR_ID_PROJETO")).longValue());
+                project.setTitle((String)r.get("NM_TITULO"));
+                project.setDescription((String)r.get("NM_DESCRICAO"));
+                project.setStatus(StatusProject.fromDescription((String)r.get("TP_STATUS")));
+                project.setCustomerId(((Number)r.get("FK_NR_ID_CLIENTE")).longValue());
+                project.setCustomerName((String)r.get("NM_NOME"));
+                project.setSkills(getSkillsByProjectId(((Number) r.get("NR_ID_PROJETO")).longValue()));
+                projects.add(project);
+            }
+            return projects;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao buscar projetos", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
-        return projects;
     }
 
     @Override
@@ -78,7 +85,7 @@ public class ProjectDaoImpl implements ProjectDao {
        
     }catch(Exception e){
         e.printStackTrace();
-        throw new RuntimeException("Erro interno ao atualizar o projeto");
+        throw new FreelasException("Erro interno ao atualizar o projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
        }
     }
 
@@ -94,7 +101,7 @@ public class ProjectDaoImpl implements ProjectDao {
             });
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Erro interno ao deletar o projeto");
+            throw new FreelasException("Erro interno ao deletar o projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
@@ -128,103 +135,128 @@ public class ProjectDaoImpl implements ProjectDao {
     
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Erro interno ao buscar projeto");
+            throw new FreelasException("Erro interno ao buscar projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
     @Override
-    public List<Project> listProjectsByCustomerId(Long id, String status) {
-        String query = "SELECT * FROM TB_PROJETO WHERE FK_NR_ID_CLIENTE = :id AND TP_STATUS = :status";
+    public List<Project> listProjectsByUserId(Long idUser) {
+        String query = "SELECT * FROM TB_PROJETO WHERE FK_NR_ID_CLIENTE = :id OR FK_NR_ID_FREELANCER = :id "+
+                "ORDER BY NR_ID_PROJETO";
         
         SqlParameterSource parameterSource = new MapSqlParameterSource()
-                .addValue("id", id)
-                .addValue("status", status);
+                .addValue("id", idUser);
 
-        var result = namedParameterJdbcTemplate.queryForList(query, parameterSource);
+        try{
+            var result = namedParameterJdbcTemplate.queryForList(query, parameterSource);
+            
+            List<Project> projects = new ArrayList<>();
+            for(var r: result){
+                Project project = new Project();
+                project.setId(((Number) r.get("NR_ID_PROJETO")).longValue());
+                project.setTitle((String)r.get("NM_TITULO"));
+                project.setDescription((String)r.get("NM_DESCRICAO"));
+                project.setStatus(StatusProject.fromDescription((String)r.get("TP_STATUS")));
+
+                BigDecimal price = (BigDecimal) r.get("vl_preco");
         
-        List<Project> projects = new ArrayList<>();
-        for(var r: result){
-            Project project = new Project();
-            project.setId(((Number) r.get("NR_ID_PROJETO")).longValue());
-            project.setTitle((String)r.get("NM_TITULO"));
-            project.setDescription((String)r.get("NM_DESCRICAO"));
-            project.setStatus(StatusProject.fromDescription((String)r.get("TP_STATUS")));
-
-            BigDecimal price = (BigDecimal) r.get("vl_preco");
-    
-            if (price != null) {
-                project.setPrice(price);
-            } else {
-                project.setPrice(BigDecimal.ZERO);
+                if (price != null) {
+                    project.setPrice(price);
+                } else {
+                    project.setPrice(BigDecimal.ZERO);
+                }
+                project.setClientId(((Number) r.get("FK_NR_ID_CLIENTE")).longValue());
+                project.setFreelancerId(((Number) r.get("FK_NR_ID_FREELANCER")).longValue());
+                project.setSkills(getSkillsByProjectId(((Number) r.get("NR_ID_PROJETO")).longValue()));
+                projects.add(project);
             }
-            project.setClientId(((Number) r.get("FK_NR_ID_CLIENTE")).longValue());
-            project.setFreelancerId(((Number) r.get("FK_NR_ID_FREELANCER")).longValue());
-            project.setSkills(getSkillsByProjectId(((Number) r.get("NR_ID_PROJETO")).longValue()));
-            projects.add(project);
+            return projects;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao buscar projetos", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
-        return projects;
     }
 
     @Override
-    public List<Project> listProjectsByFreelancerId(Long id, String status) {
+    public List<Project> listProjectsByUserIdAndStatus(Long idUser, String status) {
 
-        String query = "SELECT * FROM TB_PROJETO WHERE FK_NR_ID_FREELANCER = :id AND TP_STATUS = :status"; 
+        String query = "SELECT * FROM TB_PROJETO WHERE (FK_NR_ID_CLIENTE = :id OR FK_NR_ID_FREELANCER = :id) "+
+                "AND TP_STATUS = :status ORDER BY NR_ID_PROJETO"; 
         
         SqlParameterSource parameterSource = new MapSqlParameterSource()
-                .addValue("id", id)
+                .addValue("id", idUser)
                 .addValue("status", status);
+        try{
+            var result = namedParameterJdbcTemplate.queryForList(query, parameterSource);
+            List<Project> projects = new ArrayList<>();
+            for(var r: result){
+                Project project = new Project();
+                project.setId(((Number) r.get("NR_ID_PROJETO")).longValue());
+                project.setTitle((String)r.get("NM_TITULO"));
+                project.setDescription((String)r.get("NM_DESCRICAO"));
+                project.setStatus(StatusProject.fromDescription((String)r.get("TP_STATUS")));
+
+                BigDecimal price = (BigDecimal) r.get("vl_preco");
         
-        var result = namedParameterJdbcTemplate.queryForList(query, parameterSource);
-        List<Project> projects = new ArrayList<>();
-        for(var r: result){
-            Project project = new Project();
-            project.setId(((Number) r.get("NR_ID_PROJETO")).longValue());
-            project.setTitle((String)r.get("NM_TITULO"));
-            project.setDescription((String)r.get("NM_DESCRICAO"));
-            project.setStatus(StatusProject.fromDescription((String)r.get("TP_STATUS")));
+                if (price != null) {
+                    project.setPrice(price);
+                } else {
+                    project.setPrice(BigDecimal.ZERO);
+                }
 
-            BigDecimal price = (BigDecimal) r.get("vl_preco");
-    
-            if (price != null) {
-                project.setPrice(price);
-            } else {
-                project.setPrice(BigDecimal.ZERO);
+                project.setClientId(((Number) r.get("FK_NR_ID_CLIENTE")).longValue());
+                project.setFreelancerId(((Number) r.get("FK_NR_ID_FREELANCER")).longValue());
+
+                project.setSkills(getSkillsByProjectId(((Number) r.get("NR_ID_PROJETO")).longValue()));
+                projects.add(project);
             }
-
-            project.setClientId(((Number) r.get("FK_NR_ID_CLIENTE")).longValue());
-            project.setFreelancerId(((Number) r.get("FK_NR_ID_FREELANCER")).longValue());
-
-            project.setSkills(getSkillsByProjectId(((Number) r.get("NR_ID_PROJETO")).longValue()));
-            projects.add(project);
+            return projects;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao buscar projetos", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
-        return projects;
     }
 
     @Override
     public boolean checkProjectExists(Long id) {
         String query = "SELECT COUNT(1) FROM TB_PROJETO WHERE NR_ID_PROJETO = :id";
         SqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("id", id);
-        Integer count = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, Integer.class);
-        return count != null && count > 0;
+        try{
+            Integer count = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, Integer.class);
+            return count != null && count > 0;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao buscar projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
     @Override
     public Long customerIdByProjectId(Long id) {
         String query = "SELECT FK_NR_ID_CLIENTE FROM TB_PROJETO WHERE NR_ID_PROJETO = :id";
         SqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("id", id);
-        Long idCustomer = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, Long.class);
-        return idCustomer;
+        try{
+            Long idCustomer = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, Long.class);
+            return idCustomer;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao buscar  cliente", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
     @Override
     public void addSkillNecessary(Long[] skillIds, Long projectId) {
         String query = "INSERT INTO TB_SKILLS_NECESSARIAS_PROJETO (FK_ID_PROJETO, FK_ID_SKILL) " +
                  "VALUES (:idProject, :idSkill)";
 
-        for (int i = 0; i < skillIds.length; i++) {
-            SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                    .addValue("idProject", projectId)
-                    .addValue("idSkill", skillIds[i]);
+        try{
+            for (int i = 0; i < skillIds.length; i++) {
+                SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                        .addValue("idProject", projectId)
+                        .addValue("idSkill", skillIds[i]);
 
-            namedParameterJdbcTemplate.update(query, sqlParameterSource);
+                namedParameterJdbcTemplate.update(query, sqlParameterSource);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao adicionar dependencias no projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
@@ -233,12 +265,17 @@ public class ProjectDaoImpl implements ProjectDao {
         String query = "DELETE FROM TB_SKILLS_NECESSARIAS_PROJETO WHERE FK_ID_SKILL = :idSkill " +
                  "AND FK_ID_PROJETO = :idProject";
 
-        for (int i = 0; i < skillIds.length; i++) {
-            SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                    .addValue("idSkill", skillIds[i])
-                    .addValue("idProject", projectId);
-                    
-            namedParameterJdbcTemplate.update(query, sqlParameterSource);
+        try{
+            for (int i = 0; i < skillIds.length; i++) {
+                SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                        .addValue("idSkill", skillIds[i])
+                        .addValue("idProject", projectId);
+                        
+                namedParameterJdbcTemplate.update(query, sqlParameterSource);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao remover dependencias no projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
     
@@ -249,15 +286,19 @@ public class ProjectDaoImpl implements ProjectDao {
                    "WHERE psk.fk_id_projeto = :idProject";
         
         SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("idProject", projectId);
+        try{
+            var result = namedParameterJdbcTemplate.queryForList(query, namedParameters);
+        
+            List<String> skills = new ArrayList<>();
 
-        var result = namedParameterJdbcTemplate.queryForList(query, namedParameters);
-    
-        List<String> skills = new ArrayList<>();
-
-        for(var r : result){
-            skills.add((String) r.get("nm_skill_name"));
+            for(var r : result){
+                skills.add((String) r.get("nm_skill_name"));
+            }
+            return skills;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao buscar dependencias do projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
-        return skills;
     }
 
     @Override
@@ -265,9 +306,13 @@ public class ProjectDaoImpl implements ProjectDao {
 
         String query = "SELECT TP_STATUS FROM TB_PROJETO WHERE NR_ID_PROJETO = :idProject";
         SqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("idProject", idProject);
-        String status = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, String.class);
-
-        return StatusProject.fromDescription(status);
+        try{
+            String status = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, String.class);
+            return StatusProject.fromDescription(status);
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new FreelasException("Erro interno ao buscar status do projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 
     @Override
@@ -278,12 +323,12 @@ public class ProjectDaoImpl implements ProjectDao {
             BigDecimal price = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, BigDecimal.class);
         
             if(price == null){
-                throw new RuntimeException("Projeto nao encontrado");
+                throw new FreelasException("Projeto nao encontrado", HttpStatus.NOT_FOUND.value());
             }
             return price;
         }catch(Exception e){
             e.printStackTrace();
-            throw new RuntimeException("Erro interno ao buscar preço do projeto", e);
+            throw new FreelasException("Erro interno ao buscar preço do projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 

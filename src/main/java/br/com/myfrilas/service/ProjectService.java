@@ -65,16 +65,16 @@ public class ProjectService {
         projectDao.deleteProjectById(idProject);
     }
 
-    public List<Project> listProjectsByCustomerId(Long id, String status) {
-        List<Project> projects = projectDao.listProjectsByCustomerId(id, status);
+    public List<Project> listProjectsByUserId(Long idUser) {
+        List<Project> projects = projectDao.listProjectsByUserId(idUser);
         if(projects.size() == 0) {
             throw new FreelasException("Nenhum projeto encontrado", HttpStatus.NOT_FOUND.value());
         }
         return projects;
     }
     
-    public List<Project> listProjectsByFreelancerId(Long id, String status) {
-        List<Project> projects = projectDao.listProjectsByFreelancerId(id, status);
+    public List<Project> listProjectsByUSerIdAndStatus(Long idUser, String status) {
+        List<Project> projects = projectDao.listProjectsByUserIdAndStatus(idUser, status);
         if(projects.size() == 0) {
             throw new FreelasException("Nenhum projeto encontrado", HttpStatus.NOT_FOUND.value());
         }
@@ -93,6 +93,9 @@ public class ProjectService {
         if(checkBeforeDeleteSkills(skills, projectId)){
             Long[] idSkills = findIdSkills(skills);
             projectDao.removeSkillNecessary(idSkills, projectId);
+        }
+        else{
+            throw new FreelasException("Skill não encontrada para o projeto", HttpStatus.NOT_FOUND.value());
         }
     }
 

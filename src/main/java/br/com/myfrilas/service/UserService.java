@@ -32,6 +32,7 @@ public class UserService {
     }
 
     public void saveUser(User user) {
+        user.setPhone(user.getPhone().replaceAll("[^0-9]", ""));
         checkRegex(user);
         checkBeforeSaving(user);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -94,7 +95,6 @@ public class UserService {
         List<ErrResponse> erros = new ArrayList<>();
         String regexEmail = "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$";
         String regexName = "[a-zA-Z]+(?:\\\\s[a-zA-Z]+)*";
-        String regexPhone = "^\\(?(?:\\d{2})\\)?[-.\\s]?\\d{4,5}[-.\\s]?\\d{4}$";
 
         if(!user.getEmail().matches(regexEmail)) {
             erros.add(new ErrResponse("Email invalido", HttpStatus.BAD_REQUEST.value()));
@@ -108,16 +108,19 @@ public class UserService {
             erros.add(new ErrResponse("Nome não pode conter caracteres especiais ou numéricos", HttpStatus.BAD_REQUEST.value()));
         }
 
-        if(!user.getPhone().matches(regexPhone)) {
+        if(user.getPhone().length() != 11) {
             erros.add(new ErrResponse("Telefone invalido", HttpStatus.BAD_REQUEST.value()));
         }
 
-        if(user.getPassword().length() < 6 && user.getPassword().length() > 20) {
+        if(user.getPassword().length() < 6 || user.getPassword().length() > 20) {
             erros.add(new ErrResponse("Senha deve ter entre 6 e 20 caracteres", HttpStatus.BAD_REQUEST.value()));
         }
 
-        if( user.getTypeUser() == null) {
-            erros.add(new ErrResponse("Tipo de usuario invalido, deve ser FREELANCER ou CUSTOMER", HttpStatus.BAD_REQUEST.value()));
+        if(!(user.getTypeUser().getDescription().equals("FREELANCER") || 
+        user.getTypeUser().getDescription().equals("CUSTOMER") ||
+        user.getTypeUser().getDescription().equals("ADMIN"))) {
+            
+            throw new FreelasException("Tipo de usuario invalido, deve ser FREELANCER ou CUSTOMER", HttpStatus.BAD_REQUEST.value());
         }
 
         if (!erros.isEmpty()) {
