@@ -40,7 +40,7 @@ public class UserDaoImpl implements UserDao {
 
         SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
                 .addValue("p_nm_nome", user.getName())
-                .addValue("p_nr_cpf", user.getCpf())
+                .addValue("p_nr_cpf", user.getCpfCNPJ())
                 .addValue("p_ds_email", user.getEmail())
                 .addValue("p_ds_senha", user.getPassword())
                 .addValue("p_nr_telefone", user.getPhone())
@@ -62,7 +62,7 @@ public class UserDaoImpl implements UserDao {
             Map<String, Object> result = namedParameterJdbcTemplate.queryForMap(query, namedParameters);
             User user = new User();
             user.setName(result.get("NM_NOME").toString());
-            user.setCpf(result.get("NR_CPF").toString());
+            user.setCpfCNPJ(result.get("NR_CPF").toString());
             user.setEmail(result.get("DS_EMAIL").toString());
             user.setPassword(result.get("DS_SENHA").toString());
             user.setPhone(result.get("NR_TELEFONE").toString());
