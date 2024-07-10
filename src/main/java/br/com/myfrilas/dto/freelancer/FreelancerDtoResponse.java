@@ -29,7 +29,7 @@ public class FreelancerDtoResponse {
     public FreelancerDtoResponse(User user, List<String> skills, Long id) {
         this.id = id;
         this.name = user.getName();
-        this.cpf = user.getCpf();
+        this.cpf = user.getCpfCNPJ();
         this.email = user.getEmail();
         this.phone = user.getPhone();
         this.typeUser = user.getTypeUser();

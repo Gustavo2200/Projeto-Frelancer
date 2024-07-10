@@ -4,7 +4,7 @@ import br.com.myfrilas.enums.TypeUser;
 
 public class User {
     private String name;
-    private String cpf;
+    private String cpfCNPJ;
     private String email;
     private String phone;
     private String password;
@@ -12,9 +12,9 @@ public class User {
 
     public User() {}
     
-    public User(String name, String cpf, String email, String phone, String password, TypeUser typeUser) {
+    public User(String name, String cpfCNPJ, String email, String phone, String password, TypeUser typeUser) {
         this.name = name;
-        this.cpf = cpf;
+        this.cpfCNPJ = cpfCNPJ;
         this.email = email;
         this.phone = phone;
         this.password = password;
@@ -47,12 +47,12 @@ public class User {
         this.password = password;
     }
 
-    public String getCpf() {
-        return cpf;
+    public String getCpfCNPJ() {
+        return cpfCNPJ;
     }
 
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
+    public void setCpfCNPJ(String cpfCNPJ) {
+        this.cpfCNPJ = cpfCNPJ;
     }
 
     public TypeUser getTypeUser() {

@@ -24,15 +24,18 @@ public class UserService {
     private UserDao userDao;
     private PasswordEncoder passwordEncoder;
     private FreelancerDao freelancerDao;
+    private CnpjValidator cnpjValidator;
 
-    public UserService(UserDao userDao, PasswordEncoder passwordEncoder, FreelancerDao freelancerDao) {
+    public UserService(UserDao userDao, PasswordEncoder passwordEncoder, FreelancerDao freelancerDao, CnpjValidator cnpjValidator) {
         this.userDao = userDao;
         this.passwordEncoder = passwordEncoder;
         this.freelancerDao = freelancerDao;
+        this.cnpjValidator = cnpjValidator;
     }
 
     public void saveUser(User user) {
         user.setPhone(user.getPhone().replaceAll("[^0-9]", ""));
+        user.setCpfCNPJ(user.getCpfCNPJ().replaceAll("[^0-9]", ""));
         checkRegex(user);
         checkBeforeSaving(user);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -74,7 +77,7 @@ public class UserService {
     private void checkBeforeSaving(User user) {
         List<ErrResponse> erros = new ArrayList<>();
 
-        if (userDao.checkCpfExists(user.getCpf())) {
+        if (userDao.checkCpfExists(user.getCpfCNPJ())) {
             erros.add(new ErrResponse("Cpf já registrado", HttpStatus.CONFLICT.value()));
         }
 
@@ -96,16 +99,26 @@ public class UserService {
         String regexEmail = "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$";
         String regexName = "[a-zA-Z]+(?:\\\\s[a-zA-Z]+)*";
 
-        if(!user.getEmail().matches(regexEmail)) {
-            erros.add(new ErrResponse("Email invalido", HttpStatus.BAD_REQUEST.value()));
-        }
-
-        if(!checkCpf(user.getCpf())) {
-            erros.add(new ErrResponse("Cpf invalido", HttpStatus.BAD_REQUEST.value()));
-        }
-
         if(!user.getName().matches(regexName)) {
             erros.add(new ErrResponse("Nome não pode conter caracteres especiais ou numéricos", HttpStatus.BAD_REQUEST.value()));
+        }
+        
+        if(user.getCpfCNPJ().length() < 11 || user.getCpfCNPJ().length() > 14) {
+            erros.add(new ErrResponse("Cpf invalido", HttpStatus.BAD_REQUEST.value()));
+        }
+        else if(user.getCpfCNPJ().length() == 11){
+            if(!checkCpf(user.getCpfCNPJ())) {
+                erros.add(new ErrResponse("Cpf invalido", HttpStatus.BAD_REQUEST.value()));
+            }
+        }
+        else{
+            if(!cnpjValidator.validateCnpj(user.getCpfCNPJ())){
+                erros.add(new ErrResponse("Cnpj invalido", HttpStatus.BAD_REQUEST.value()));
+            }
+        }
+
+        if(!user.getEmail().matches(regexEmail)) {
+            erros.add(new ErrResponse("Email invalido", HttpStatus.BAD_REQUEST.value()));
         }
 
         if(user.getPhone().length() != 11) {
