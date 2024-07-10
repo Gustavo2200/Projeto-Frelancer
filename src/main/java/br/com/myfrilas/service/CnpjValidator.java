@@ -2,9 +2,9 @@ package br.com.myfrilas.service;
 
 import org.springframework.http.HttpStatus;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import br.com.myfrilas.err.exceptions.FreelasException;
@@ -22,13 +22,13 @@ public class CnpjValidator {
             String requestBody = restTemplate.getForObject(url, String.class);
 
             JSONObject json = new JSONObject(requestBody);
-            if(json.getString("status").equals("OK")){
-                return true;
-            }else{
+            if(json.getString("status").equals("ERROR")){
                 return false;
+            }else{
+                return true;
             }
-        }catch(JSONException e){
-            throw new FreelasException("Limite de tentativas excedido, tente novamente mais tarde", HttpStatus.TOO_MANY_REQUESTS.value());
+        }catch(HttpClientErrorException e){
+            throw new FreelasException("Houve um erro inesperado, tente novamente mais tarde", HttpStatus.TOO_MANY_REQUESTS.value());
         }
     }
 }
