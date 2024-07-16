@@ -54,7 +54,7 @@ public class ProjectController {
 
     @Operation(summary = "Cria um novo projeto e o salva no banco de dados", method = "POST")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Projeto criado com sucesso"),
+        @ApiResponse(responseCode = "201", description = "Projeto criado com sucesso"),
         @ApiResponse(responseCode = "401", description = "Acesso não autorizado", content = {
             @Content(mediaType = "application/json", schema = @Schema(implementation = ErrResponse.class))
         }),
@@ -77,7 +77,7 @@ public class ProjectController {
         String userId = decodedJWT.getClaim("user_id").asString(); // Extrai o ID do usuário
         projectService.saveProject(Long.parseLong(userId), project);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @Operation(summary = "Busca todos os projetos com o status informado", method = "GET")

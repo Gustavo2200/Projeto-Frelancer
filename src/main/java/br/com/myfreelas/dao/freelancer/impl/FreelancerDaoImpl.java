@@ -67,7 +67,7 @@ public class FreelancerDaoImpl implements FreelancerDao{
             return namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Long.class);
         }catch(Exception e){
             e.printStackTrace();
-            throw new FreelasException("Skill inexistente", HttpStatus.NOT_FOUND.value());
+            throw new FreelasException("Skill '" + skill + "' não existe", HttpStatus.NOT_FOUND.value());
         }        
     }
 

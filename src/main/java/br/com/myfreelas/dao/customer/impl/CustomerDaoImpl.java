@@ -19,7 +19,7 @@ import br.com.myfreelas.model.Proposal;
 public class CustomerDaoImpl implements CustomerDao{
 
     private final BigDecimal TAXA = new BigDecimal(3);
-    private final Long idAdmin = 9L;
+    private final Long idAdmin = 10L;
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 

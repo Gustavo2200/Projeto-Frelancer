@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -40,7 +41,7 @@ public class UserDaoImpl implements UserDao {
 
         SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
                 .addValue("p_nm_nome", user.getName())
-                .addValue("p_nr_cpf", user.getCpfCNPJ())
+                .addValue("p_nr_cpf_cnpj", user.getCpfCNPJ())
                 .addValue("p_ds_email", user.getEmail())
                 .addValue("p_ds_senha", user.getPassword())
                 .addValue("p_nr_telefone", user.getPhone())
@@ -62,7 +63,7 @@ public class UserDaoImpl implements UserDao {
             Map<String, Object> result = namedParameterJdbcTemplate.queryForMap(query, namedParameters);
             User user = new User();
             user.setName(result.get("NM_NOME").toString());
-            user.setCpfCNPJ(result.get("NR_CPF").toString());
+            user.setCpfCNPJ(result.get("NR_CPF_CNPJ").toString());
             user.setEmail(result.get("DS_EMAIL").toString());
             user.setPassword(result.get("DS_SENHA").toString());
             user.setPhone(result.get("NR_TELEFONE").toString());
@@ -77,7 +78,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public boolean checkCpfExists(String cpf) {
-        String querry = "SELECT COUNT(1) FROM TB_USUARIO WHERE NR_CPF = :cpf";  //parametro nomeado :cpf sera substituido por cpf
+        String querry = "SELECT COUNT(1) FROM TB_USUARIO WHERE NR_CPF_CNPJ = :cpf";  //parametro nomeado :cpf sera substituido por cpf
         SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("cpf", cpf);
         try{
             Integer count = namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Integer.class);
@@ -121,6 +122,9 @@ public class UserDaoImpl implements UserDao {
         
         try {
             return namedParameterJdbcTemplate.queryForMap(query, parameters);
+        }catch(EmptyResultDataAccessException e){
+
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             throw new FreelasException("Erro interno ao buscar usuário", HttpStatus.INTERNAL_SERVER_ERROR.value());
