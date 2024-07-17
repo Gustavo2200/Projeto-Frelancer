@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @RestController
 @RequestMapping(value = "/project", produces = {"application/json"})
-@Tag(name = "product controller")
+@Tag(name = "project controller")
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
 
