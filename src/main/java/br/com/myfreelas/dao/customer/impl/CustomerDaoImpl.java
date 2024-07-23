@@ -19,7 +19,7 @@ import br.com.myfreelas.model.Proposal;
 public class CustomerDaoImpl implements CustomerDao{
 
     private final BigDecimal TAXA = new BigDecimal(3);
-    private final Long idAdmin = 10L;
+    private final Long ID_ADMIN = 10L;
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
@@ -86,7 +86,7 @@ public class CustomerDaoImpl implements CustomerDao{
 
         SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
                 .addValue("idProject", idProject)
-                .addValue("idAdmin", idAdmin)
+                .addValue("idAdmin", ID_ADMIN)
                 .addValue("taxa", TAXA);
 
         try{

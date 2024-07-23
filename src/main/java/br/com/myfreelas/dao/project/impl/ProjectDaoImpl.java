@@ -52,29 +52,30 @@ public class ProjectDaoImpl implements ProjectDao {
 
     @Override
     public List<ProjectDtoResponse> listProjectsByStatus(String status) {
-        String query = "SELECT NR_ID_PROJETO, NM_TITULO, NM_DESCRICAO, TP_STATUS, FK_NR_ID_CLIENTE, TB_USUARIO.NM_NOME FROM TB_PROJETO \r\n" + //
-                        "JOIN TB_USUARIO ON FK_NR_ID_CLIENTE = NR_ID_USUARIO WHERE TP_STATUS = ? "+
-                        "ORDER BY NR_ID_PROJETO"; 
-        try{
-            var result = jdbcTemplate.queryForList(query, status);
+        String query = "SELECT * FROM list_projects_by_status(:status)";
+    
+        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("status", status);
+        try {
+            var result = namedParameterJdbcTemplate.queryForList(query, namedParameters);
             List<ProjectDtoResponse> projects = new ArrayList<>();
-            for(var r: result){
+            for (var r : result) {
                 ProjectDtoResponse project = new ProjectDtoResponse();
-                project.setId(((Number)r.get("NR_ID_PROJETO")).longValue());
-                project.setTitle((String)r.get("NM_TITULO"));
-                project.setDescription((String)r.get("NM_DESCRICAO"));
-                project.setStatus(StatusProject.fromDescription((String)r.get("TP_STATUS")));
-                project.setCustomerId(((Number)r.get("FK_NR_ID_CLIENTE")).longValue());
-                project.setCustomerName((String)r.get("NM_NOME"));
-                project.setSkills(getSkillsByProjectId(((Number) r.get("NR_ID_PROJETO")).longValue()));
+                project.setId(((Number) r.get("nr_id_projeto")).longValue());
+                project.setTitle((String) r.get("nm_titulo"));
+                project.setDescription((String) r.get("nm_descricao"));
+                project.setStatus(StatusProject.fromDescription((String) r.get("tp_status")));
+                project.setCustomerId(((Number) r.get("fk_nr_id_cliente")).longValue());
+                project.setCustomerName((String) r.get("nm_nome"));
+                project.setSkills(getSkillsByProjectId(((Number) r.get("nr_id_projeto")).longValue()));
                 projects.add(project);
             }
             return projects;
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             throw new FreelasException("Erro interno ao buscar projetos", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
+    
 
     @Override
     public void updateProject(UpdateProjectDtoRequest project) {
@@ -281,25 +282,18 @@ public class ProjectDaoImpl implements ProjectDao {
     
     @Override
     public List<String> getSkillsByProjectId(Long projectId) {
-        String query = "SELECT nm_skill_name FROM TB_SKILL s " +
-                   "JOIN TB_SKILLS_NECESSARIAS_PROJETO psk ON s.nr_id_skill = psk.fk_id_skill " +
-                   "WHERE psk.fk_id_projeto = :idProject";
+        String query = "SELECT * FROM get_skills_by_project_id(:idProject)";
         
         SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("idProject", projectId);
-        try{
-            var result = namedParameterJdbcTemplate.queryForList(query, namedParameters);
-        
-            List<String> skills = new ArrayList<>();
-
-            for(var r : result){
-                skills.add((String) r.get("nm_skill_name"));
-            }
+        try {
+            List<String> skills = namedParameterJdbcTemplate.query(query, namedParameters, (rs, rowNum) -> rs.getString("nm_skill_name"));
             return skills;
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            throw new FreelasException("Erro interno ao buscar dependencias do projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            throw new FreelasException("Erro interno ao buscar dependências do projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
+
 
     @Override
     public StatusProject checkStatusProject(Long idProject) {

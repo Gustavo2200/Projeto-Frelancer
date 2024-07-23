@@ -32,8 +32,12 @@ public class AuthController {
 
     @Operation(summary = "Realiza o login de usuarios retornando o token de acesso", method = "POST")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Retorna o token de acesso", content = {
-            @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TokenJwtResponse.class)) 
+        @ApiResponse(
+            responseCode = "200",
+            description = "Retorna o token de acesso",
+            content = {
+                @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, 
+                schema = @Schema(implementation = TokenJwtResponse.class)) 
         }),
         @ApiResponse(responseCode = "404", description = "Email não encontrado", content = {
             @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrResponse.class))

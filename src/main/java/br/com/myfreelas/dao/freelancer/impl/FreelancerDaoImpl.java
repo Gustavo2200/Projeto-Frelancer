@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -91,41 +92,42 @@ public class FreelancerDaoImpl implements FreelancerDao{
 
     @Override
     public void sendProposal(ProposalDtoRequest proposal, Long idFreelancer) {
-        String query = "INSERT INTO TB_PROPOSTA (FK_ID_FREELANCER, FK_ID_PROJETO, NM_COMENTARIO, VL_VALOR) " +
-                "VALUES (:idFreelancer, :idProject, :comment, :value)";
+        String query = "SELECT send_proposal(:idFreelancer, :idProject, :comment, :value)";
 
         SqlParameterSource namedParameters = new MapSqlParameterSource()
                 .addValue("idFreelancer", idFreelancer)
                 .addValue("idProject", proposal.getIdProject())
                 .addValue("comment", proposal.getComment())
                 .addValue("value", proposal.getValue());
-        try{
-            namedParameterJdbcTemplate.update(query, namedParameters);
-        }catch(Exception e){
+        try {
+            namedParameterJdbcTemplate.execute(query, namedParameters, (PreparedStatementCallback<Object>) ps ->{
+            ps.execute();
+            return null;
+           });
+        } catch (Exception e) {
             e.printStackTrace();
+            System.out.println(e.getMessage());
             throw new FreelasException("Erro interno ao enviar proposta", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
+
     
     @Override
-    public List<String> getSkillsByFreelancerId(Long idFreelancer){
-        String query = "SELECT nm_skill_name FROM TB_SKILL s " +
-                       "JOIN TB_FREELANCER_SKILLS psk ON s.nr_id_skill = psk.fk_id_skill " +
-                       "WHERE psk.fk_id_freelancer = :idFreelancer";
+    public List<String> getSkillsByFreelancerId(Long idFreelancer) {
+        String query = "SELECT * FROM get_skills_by_freelancer_id(:idFreelancer)";
 
         SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("idFreelancer", idFreelancer);
-        try{
+        try {
             var result = namedParameterJdbcTemplate.queryForList(query, namedParameters);
 
             List<String> skills = new ArrayList<>();
-            for(var r : result){
+            for (var r : result) {
                 skills.add(r.get("nm_skill_name").toString());
             }
             return skills;
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             throw new FreelasException("Erro interno ao buscar skills", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
-     }
-
+    }
 }
