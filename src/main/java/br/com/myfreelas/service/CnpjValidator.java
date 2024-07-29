@@ -13,11 +13,8 @@ import br.com.myfreelas.err.exceptions.FreelasException;
 public class CnpjValidator {
     
     private final String BASE_URL = "https://www.receitaws.com.br/v1/cnpj/";
-    private final RestTemplate restTemplate;
 
-    public CnpjValidator(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
+    private RestTemplate restTemplate = new RestTemplate();
 
     public boolean validateCnpj(String cnpj) {
         try{

@@ -73,7 +73,12 @@ public class UserService {
         List<ErrResponse> erros = new ArrayList<>();
 
         if (userDao.checkCpfExists(user.getCpfCNPJ())) {
-            erros.add(new ErrResponse("Cpf já registrado", HttpStatus.CONFLICT.value()));
+            if(user.getCpfCNPJ().length() == 14) {
+                erros.add(new ErrResponse("Cnpj já registrado", HttpStatus.CONFLICT.value()));
+            }
+            else{
+                erros.add(new ErrResponse("Cpf já registrado", HttpStatus.CONFLICT.value()));
+            }
         }
 
         if (userDao.checkEmailExists(user.getEmail())) {
