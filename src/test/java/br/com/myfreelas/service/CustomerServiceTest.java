@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 
+import static org.mockito.ArgumentMatchers.any;
+
 @ExtendWith(MockitoExtension.class)
 public class CustomerServiceTest {
 
@@ -119,6 +121,45 @@ public class CustomerServiceTest {
         });
 
         Assertions.assertEquals("Proposta nao encontrada", e.getMessage());
+    }
+    @Test
+    @DisplayName("Aceita uma proposata com sucesso")
+    void acceptProposalSuccess(){
+
+        Long idProposal = 12L;
+        Long idCustomer = 13L;
+
+        Mockito.when(customerDao.checkProposalExists(any())).thenReturn(true);
+        Mockito.when(customerDao.idProjectByIdProposal(any())).thenReturn(14L);
+        Mockito.when(projectDao.checkProjectExists(any())).thenReturn(true);
+        Mockito.when(projectDao.customerIdByProjectId(any())).thenReturn(idCustomer);
+
+        service.acceptProposal(idProposal, idCustomer);
+
+        Mockito.verify(customerDao, Mockito.times(1)).acceptProposal(any());
+    }
+    @Test
+    @DisplayName("Proposta não encontrada")
+    void acceptProposalErrorCase1(){
+
+        Long idProposal = 12L;
+        Long idCustomer = 13L;
+
+        Mockito.when(customerDao.checkProposalExists(any())).thenReturn(false);
+
+        Exception e = Assertions.assertThrows(FreelasException.class, () ->{
+            service.acceptProposal(idProposal, idCustomer);
+        });
+
+        Assertions.assertEquals("Proposta nao encontrada", e.getMessage());
+    }
+
+    @Test
+    @DisplayName("Teste depositar saldo")
+    void depositBalance(){
+        service.depositBalance(any(), any());
+
+        Mockito.verify(customerDao, Mockito.times(1)).depositBalance(any(), any());
     }
 
     @Test
