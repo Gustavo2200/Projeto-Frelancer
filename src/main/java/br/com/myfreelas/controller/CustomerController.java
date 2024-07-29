@@ -50,7 +50,7 @@ public class CustomerController {
         @ApiResponse(responseCode = "200", description = "Retorna as propostas do projeto", content = {
             @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = Proposal.class)))
         }),
-        @ApiResponse(responseCode = "404", description = "Projeto não encontrado ou não possui propostas", content = {
+        @ApiResponse(responseCode = "404", description = "Projeto não encontrado", content = {
             @Content(mediaType = "application/json", schema = @Schema(implementation = ErrResponse.class))
         }),
         @ApiResponse(responseCode = "400", description = "Cliente não é autor do projeto", content = {

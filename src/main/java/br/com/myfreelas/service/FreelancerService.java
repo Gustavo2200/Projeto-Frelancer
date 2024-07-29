@@ -65,11 +65,9 @@ public class FreelancerService {
 
         for(Skill skill : skills) {
             Long idSkill = checkBeforeSaving(skill.getSkill());
-            
-            
+
             if(!this.freelancerDao.checkSkillIsAlreadySaved(idSkill, idFreelancer)) {
-                continue;   
-           
+                continue;
             }else{
                 idSkills.add(idSkill);
             }
@@ -106,11 +104,11 @@ public class FreelancerService {
         try{
            List<Proposal> proposals = customerDao.viewProposalsByProjectId(proposal.getIdProject());
 
-           for(int i = 0; i < proposals.size(); i++) {
-               if((proposals.get(i)).getIdFreelancer() == idFreelancer) {
-                return true;
-               }
-           }
+            for (Proposal value : proposals) {
+                if (value.getIdFreelancer() == idFreelancer) {
+                    return true;
+                }
+            }
 
            return false;
         }catch(Exception e) {

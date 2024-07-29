@@ -25,11 +25,7 @@ public class CustomerService {
 
     public List<Proposal> viewProposalsByProjectId(Long idProject, Long idCustomer) {
         validadeCustomer(idCustomer, idProject);
-        List<Proposal> proposals = customerDao.viewProposalsByProjectId(idProject);
-        if(proposals.size() == 0) {
-            throw new FreelasException("Nenhum proposta encontrada", HttpStatus.NOT_FOUND.value());
-        }
-        return proposals;
+        return customerDao.viewProposalsByProjectId(idProject);
     }
 
     public void rejectProposal(Long idProposal, Long idCustomer) {

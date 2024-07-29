@@ -13,7 +13,11 @@ import br.com.myfreelas.err.exceptions.FreelasException;
 public class CnpjValidator {
     
     private final String BASE_URL = "https://www.receitaws.com.br/v1/cnpj/";
-    private RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+
+    public CnpjValidator(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     public boolean validateCnpj(String cnpj) {
         try{
@@ -24,9 +28,9 @@ public class CnpjValidator {
             JSONObject json = new JSONObject(requestBody);
             if(json.getString("status").equals("ERROR")){
                 return false;
-            }else{
-                return true;
             }
+            return true;
+
         }catch(HttpClientErrorException e){
             throw new FreelasException("Limite de tentativas excedido, tente novamente mais tarde", HttpStatus.TOO_MANY_REQUESTS.value());
         }
