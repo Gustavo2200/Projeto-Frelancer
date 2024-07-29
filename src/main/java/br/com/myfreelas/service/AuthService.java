@@ -38,9 +38,6 @@ public class AuthService {
         }
 
         String passwordFromDb = (String) dataAuthentication.get("DS_SENHA");
-        if (passwordFromDb == null) {
-            throw new FreelasException("Senha não encontrada para o usuário", HttpStatus.UNAUTHORIZED.value());
-        }
 
         checkPassword(loguinDto.getPassword(), passwordFromDb);
         return dataAuthentication;

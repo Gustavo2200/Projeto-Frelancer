@@ -4,7 +4,14 @@ public class LoguinDto {
     
     private String email;
     private String password;
-    
+
+    public LoguinDto(){}
+
+    public LoguinDto(String email, String password){
+        this.email = email;
+        this.password = password;
+    }
+
     public String getEmail() {
         return email;
     }
