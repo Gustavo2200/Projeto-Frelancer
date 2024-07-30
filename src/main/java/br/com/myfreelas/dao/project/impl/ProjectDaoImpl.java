@@ -54,7 +54,7 @@ public class ProjectDaoImpl implements ProjectDao {
     public List<ProjectDtoResponse> listProjectsByStatus(String status) {
         String query = "SELECT * FROM list_projects_by_status(:status)";
     
-        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("status", status);
+        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("status", status.toUpperCase());
         try {
             var result = namedParameterJdbcTemplate.queryForList(query, namedParameters);
             List<ProjectDtoResponse> projects = new ArrayList<>();
@@ -129,7 +129,12 @@ public class ProjectDaoImpl implements ProjectDao {
             }
     
             project.setClientId(((Number) result.get("fk_nr_id_cliente")).longValue());
-            project.setFreelancerId(((Number) result.get("fk_nr_id_freelancer")).longValue());
+            if(result.get("fk_nr_id_freelancer") != null){
+                project.setFreelancerId(((Number) result.get("fk_nr_id_freelancer")).longValue());
+            }
+            else{
+                project.setFreelancerId(null);
+            }
             project.setSkills(getSkillsByProjectId(id));
     
             return project;
@@ -186,7 +191,7 @@ public class ProjectDaoImpl implements ProjectDao {
         
         SqlParameterSource parameterSource = new MapSqlParameterSource()
                 .addValue("id", idUser)
-                .addValue("status", status);
+                .addValue("status", status.toUpperCase());
         try{
             var result = namedParameterJdbcTemplate.queryForList(query, parameterSource);
             List<Project> projects = new ArrayList<>();
@@ -206,8 +211,13 @@ public class ProjectDaoImpl implements ProjectDao {
                 }
 
                 project.setClientId(((Number) r.get("FK_NR_ID_CLIENTE")).longValue());
-                project.setFreelancerId(((Number) r.get("FK_NR_ID_FREELANCER")).longValue());
-
+                
+                if(r.get("FK_NR_ID_FREELANCER") != null){
+                    project.setFreelancerId(((Number) r.get("FK_NR_ID_FREELANCER")).longValue());
+                }
+                else{
+                    project.setFreelancerId(null);
+                }
                 project.setSkills(getSkillsByProjectId(((Number) r.get("NR_ID_PROJETO")).longValue()));
                 projects.add(project);
             }

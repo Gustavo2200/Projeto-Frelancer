@@ -34,7 +34,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/user/save-user").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**","/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())
-                .cors(cors -> cors.disable())
                 .addFilterBefore(filterJwt, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }          

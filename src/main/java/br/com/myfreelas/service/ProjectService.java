@@ -66,19 +66,12 @@ public class ProjectService {
     }
 
     public List<Project> listProjectsByUserId(Long idUser) {
-        List<Project> projects = projectDao.listProjectsByUserId(idUser);
-        if(projects.size() == 0) {
-            throw new FreelasException("Nenhum projeto encontrado", HttpStatus.NOT_FOUND.value());
-        }
-        return projects;
+        return projectDao.listProjectsByUserId(idUser);
     }
     
     public List<Project> listProjectsByUSerIdAndStatus(Long idUser, String status) {
-        List<Project> projects = projectDao.listProjectsByUserIdAndStatus(idUser, status);
-        if(projects.size() == 0) {
-            throw new FreelasException("Nenhum projeto encontrado", HttpStatus.NOT_FOUND.value());
-        }
-        return projects;
+        checkStatus(status);
+        return projectDao.listProjectsByUserIdAndStatus(idUser, status);
     }
 
     public void addSkillNecessary(List<Skill> skills, Long projectId, Long idCustomer) {
