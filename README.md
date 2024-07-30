@@ -39,9 +39,9 @@ Abra o terminal e execute o seguinte comando para criar um novo banco de dados:
 ## Importe o dump do banco de dados:
 Com o banco de dados criado, execute o seguinte comando para importar o dump:
 
-    psql -U seu_usuario -d myfreelasdb -f caminho/para/o/dump.sql
+    psql -U seu_usuario -d myfreelasdb -f caminho/para/o/dumpBanco.backup
 
-Substitua *seu_usuario* pelo seu nome de usuário do PostgreSQL e *caminho/para/o/dump.sql* pelo caminho para o arquivo de dump no seu sistema.
+Substitua *seu_usuario* pelo seu nome de usuário do PostgreSQL e *caminho/para/o/dumpBanco.backup* pelo caminho para o arquivo de dump no seu sistema.
 
 ## Configure a conexão no aplicativo:
 Ajuste a conexão no apliccation-local.properties:
