@@ -2,17 +2,21 @@ package br.com.myfreelas.dao.skill.impl;
 
 import java.util.List;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import lombok.extern.slf4j.Slf4j;
+
 import br.com.myfreelas.dao.skill.SkillDao;
 import br.com.myfreelas.dto.skill.SkillDto;
 import br.com.myfreelas.err.exceptions.FreelasException;
 import br.com.myfreelas.model.Skill;
 
+@Slf4j
 @Repository
 public class SkillDaoImpl implements SkillDao {
 
@@ -33,7 +37,7 @@ public class SkillDaoImpl implements SkillDao {
         try{
             namedParameterJdbcTemplate.update(querry, namedParameters);
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao salvar skill", e.getMessage());
             throw new FreelasException("Erro interno ao salvar a skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -51,7 +55,7 @@ public class SkillDaoImpl implements SkillDao {
         
             return skills;
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar skills", e.getMessage());
             throw new FreelasException("Erro interno ao buscar as skills", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -64,7 +68,7 @@ public class SkillDaoImpl implements SkillDao {
         try{
             namedParameterJdbcTemplate.update(querry, namedParameters);
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao deletar skill", e.getMessage());
             throw new FreelasException("Erro interno ao deletar a skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -78,7 +82,7 @@ public class SkillDaoImpl implements SkillDao {
         try{
             namedParameterJdbcTemplate.update(querry, namedParameters);
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao atualizar skill", e.getMessage());
             throw new FreelasException("Erro interno ao atualizar a skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -96,7 +100,7 @@ public class SkillDaoImpl implements SkillDao {
             }
             return count > 0;
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao verificar skill", e.getMessage());
             throw new FreelasException("Erro interno ao buscar a skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -112,9 +116,12 @@ public class SkillDaoImpl implements SkillDao {
                 return skillDto;
             });
             return skill;
-        }catch(Exception e){
-            e.printStackTrace();
+        }catch(EmptyResultDataAccessException e){
             return null;
+                
+        }catch(Exception e){
+            log.error("Erro ao buscar skill", e.getMessage());
+            throw new FreelasException("Erro interno ao buscar a skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
     

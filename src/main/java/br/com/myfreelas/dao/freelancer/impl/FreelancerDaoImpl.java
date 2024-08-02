@@ -9,11 +9,13 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
+import lombok.extern.slf4j.Slf4j;
 
 import br.com.myfreelas.dao.freelancer.FreelancerDao;
 import br.com.myfreelas.dto.proposal.ProposalDtoRequest;
 import br.com.myfreelas.err.exceptions.FreelasException;
 
+@Slf4j
 @Repository
 public class FreelancerDaoImpl implements FreelancerDao{
 
@@ -35,7 +37,7 @@ public class FreelancerDaoImpl implements FreelancerDao{
         try{
             namedParameterJdbcTemplate.update(query, namedParameters);
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao salvar skill", e.getMessage());
             throw new FreelasException("Erro interno ao salvar skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
         }
@@ -53,7 +55,7 @@ public class FreelancerDaoImpl implements FreelancerDao{
         try{
             namedParameterJdbcTemplate.update(query, namedParameters);
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao deletar skill", e.getMessage());
             throw new FreelasException("Erro interno ao deletar skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
         }
@@ -67,7 +69,7 @@ public class FreelancerDaoImpl implements FreelancerDao{
         
             return namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Long.class);
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar skill", e.getMessage());
             throw new FreelasException("Skill '" + skill + "' não existe", HttpStatus.NOT_FOUND.value());
         }        
     }
@@ -105,8 +107,7 @@ public class FreelancerDaoImpl implements FreelancerDao{
             return null;
            });
         } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
+            log.error("Erro ao enviar proposta", e.getMessage());
             throw new FreelasException("Erro interno ao enviar proposta", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -126,7 +127,7 @@ public class FreelancerDaoImpl implements FreelancerDao{
             }
             return skills;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Erro ao buscar skills", e.getMessage());
             throw new FreelasException("Erro interno ao buscar skills", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
