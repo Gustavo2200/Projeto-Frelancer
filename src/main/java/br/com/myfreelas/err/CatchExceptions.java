@@ -23,6 +23,7 @@ public class CatchExceptions extends ResponseEntityExceptionHandler {
 
     private List<ErrResponse> errors;
 
+    @SuppressWarnings("null")
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
@@ -51,6 +52,7 @@ public class CatchExceptions extends ResponseEntityExceptionHandler {
         HttpStatus.valueOf(ex.getStatus()));
     }
 
+    @SuppressWarnings("null")
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
                                                                   HttpHeaders headers, HttpStatusCode status, WebRequest request) {
