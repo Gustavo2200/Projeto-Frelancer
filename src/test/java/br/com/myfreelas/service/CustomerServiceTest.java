@@ -33,6 +33,7 @@ public class CustomerServiceTest {
     @Mock
     ProjectDaoImpl projectDao;
 
+    @SuppressWarnings("deprecation")
     @BeforeEach
     void setUp(){
         MockitoAnnotations.initMocks(this);

@@ -30,6 +30,7 @@ class CnpjValidatorTest {
     @InjectMocks
     CnpjValidator cnpjValidator;
 
+    @SuppressWarnings("deprecation")
     @BeforeEach
     void setUp(){
         MockitoAnnotations.initMocks(this);

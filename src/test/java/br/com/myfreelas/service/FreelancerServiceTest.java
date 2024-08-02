@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +43,7 @@ class FreelancerServiceTest {
     @Autowired
     FreelancerService freelancerService;
 
+    @SuppressWarnings("deprecation")
     @BeforeEach
     void setUp(){
         MockitoAnnotations.initMocks(this);
