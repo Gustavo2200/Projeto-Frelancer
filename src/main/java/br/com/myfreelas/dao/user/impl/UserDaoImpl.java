@@ -16,6 +16,8 @@ import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
+
 import br.com.myfreelas.dao.user.UserDao;
 import br.com.myfreelas.enums.TypeTransaction;
 import br.com.myfreelas.enums.TypeUser;
@@ -23,6 +25,7 @@ import br.com.myfreelas.err.exceptions.FreelasException;
 import br.com.myfreelas.model.Transaction;
 import br.com.myfreelas.model.User;
 
+@Slf4j
 @Repository
 public class UserDaoImpl implements UserDao {
 
@@ -51,7 +54,7 @@ public class UserDaoImpl implements UserDao {
         try {
             jdbcCall.execute(sqlParameterSource);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Erro ao salvar o usuário", e.getMessage());
             throw new FreelasException("Erro interno ao salvar usuário", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -71,7 +74,7 @@ public class UserDaoImpl implements UserDao {
            
             return user;
         }catch (Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar usuário", e.getMessage());
             throw new FreelasException("Erro interno ao buscar usuário", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -84,7 +87,7 @@ public class UserDaoImpl implements UserDao {
             Integer count = namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Integer.class);
             return count != null && count > 0;
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar cpf", e.getMessage());
             throw new FreelasException("Erro interno ao buscar cpf", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -97,7 +100,7 @@ public class UserDaoImpl implements UserDao {
             Integer count = namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Integer.class);
             return count != null && count > 0;
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar email", e.getMessage());
             throw new FreelasException("Erro interno ao buscar email", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -110,7 +113,7 @@ public class UserDaoImpl implements UserDao {
             Integer count = namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Integer.class);
             return count != null && count > 0;
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar telefone", e.getMessage());
             throw new FreelasException("Erro interno ao buscar telefone", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -126,7 +129,7 @@ public class UserDaoImpl implements UserDao {
 
             return null;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Erro ao buscar usuário", e.getMessage());
             throw new FreelasException("Erro interno ao buscar usuário", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -139,7 +142,7 @@ public class UserDaoImpl implements UserDao {
         
             return TypeUser.fromDescription(type);
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar tipo de usuário", e.getMessage());
             throw new FreelasException("Erro interno ao buscar tipo de usuário", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -176,7 +179,7 @@ public class UserDaoImpl implements UserDao {
 
             return transactions;
         }catch (Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar historico de transferências", e.getMessage());
             throw new FreelasException("Erro interno ao buscar historico de transferências", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -189,7 +192,7 @@ public class UserDaoImpl implements UserDao {
             BigDecimal balance = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, BigDecimal.class);
             return balance;
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar saldo", e.getMessage());
             throw new FreelasException("Erro interno ao buscar saldo", HttpStatus.INTERNAL_SERVER_ERROR.value());
             
         }

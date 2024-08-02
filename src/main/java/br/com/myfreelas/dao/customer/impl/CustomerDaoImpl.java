@@ -10,11 +10,13 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
+import lombok.extern.slf4j.Slf4j;
 
 import br.com.myfreelas.dao.customer.CustomerDao;
 import br.com.myfreelas.err.exceptions.FreelasException;
 import br.com.myfreelas.model.Proposal;
 
+@Slf4j
 @Repository
 public class CustomerDaoImpl implements CustomerDao{
 
@@ -46,7 +48,7 @@ public class CustomerDaoImpl implements CustomerDao{
             }
             return proposals;
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar propostas", e.getMessage());
             throw new FreelasException("Erro interno ao buscar propostas", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -62,7 +64,7 @@ public class CustomerDaoImpl implements CustomerDao{
             return null;
            });
        }catch(Exception e){
-        e.printStackTrace();
+        log.error("Erro ao aceitar proposta", e.getMessage());
         throw new FreelasException("Erro interno ao aceitar proposta", HttpStatus.INTERNAL_SERVER_ERROR.value());
        }
     }
@@ -75,7 +77,7 @@ public class CustomerDaoImpl implements CustomerDao{
             SqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("id", idProposal);
             namedParameterJdbcTemplate.update(query, sqlParameterSource);
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao rejeitar proposta", e.getMessage());
             throw new FreelasException("Erro interno ao rejeitar proposta", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -95,7 +97,7 @@ public class CustomerDaoImpl implements CustomerDao{
                 return null;
             });
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao concluir projeto", e.getMessage());
             throw new FreelasException("Erro interno ao concluir projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -109,7 +111,7 @@ public class CustomerDaoImpl implements CustomerDao{
             Integer count = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, Integer.class);
             return count != null && count > 0;
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar proposta", e);
             throw new FreelasException("Erro interno ao buscar proposta", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -130,7 +132,7 @@ public class CustomerDaoImpl implements CustomerDao{
             return balance.compareTo(valueProject) >= 0;
         
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao checar saldo", e.getMessage());
             throw new FreelasException("Erro checar saldo", HttpStatus.INTERNAL_SERVER_ERROR.value());    
         }
     }
@@ -144,7 +146,7 @@ public class CustomerDaoImpl implements CustomerDao{
             Long idProject = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, Long.class);
             return idProject;
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar proposta", e.getMessage());
             throw new FreelasException("Erro interno ao buscar proposta", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -159,7 +161,7 @@ public class CustomerDaoImpl implements CustomerDao{
                     
             namedParameterJdbcTemplate.update(query, sqlParameterSource);
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao depositar saldo", e.getMessage());
             throw new FreelasException("Erro interno ao depositar saldo", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }

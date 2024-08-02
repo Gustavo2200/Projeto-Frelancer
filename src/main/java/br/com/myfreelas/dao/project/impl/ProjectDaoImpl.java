@@ -13,6 +13,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.stereotype.Repository;
 
+import lombok.extern.slf4j.Slf4j;
+
 import br.com.myfreelas.dao.project.ProjectDao;
 import br.com.myfreelas.dto.project.ProjectDtoRequest;
 import br.com.myfreelas.dto.project.ProjectDtoResponse;
@@ -21,6 +23,7 @@ import br.com.myfreelas.enums.StatusProject;
 import br.com.myfreelas.err.exceptions.FreelasException;
 import br.com.myfreelas.model.Project;
 
+@Slf4j
 @Repository
 public class ProjectDaoImpl implements ProjectDao {
 
@@ -45,7 +48,7 @@ public class ProjectDaoImpl implements ProjectDao {
         try{
             jdbcCall.execute(sqlParameterSource);
         }catch (Exception e) {
-            e.printStackTrace();
+            log.error("Erro ao salvar o projeto", e.getMessage());
             throw new FreelasException("Erro interno ao salvar o projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -71,7 +74,7 @@ public class ProjectDaoImpl implements ProjectDao {
             }
             return projects;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Erro ao buscar projetos", e.getMessage());
             throw new FreelasException("Erro interno ao buscar projetos", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -85,7 +88,7 @@ public class ProjectDaoImpl implements ProjectDao {
         jdbcTemplate.update(query, project.getTitle(), project.getDescription(), project.getId());
        
     }catch(Exception e){
-        e.printStackTrace();
+        log.error("Erro ao atualizar o projeto", e.getMessage());
         throw new FreelasException("Erro interno ao atualizar o projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
        }
     }
@@ -101,7 +104,7 @@ public class ProjectDaoImpl implements ProjectDao {
                 return null;
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Erro ao deletar o projeto", e.getMessage());
             throw new FreelasException("Erro interno ao deletar o projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -140,7 +143,7 @@ public class ProjectDaoImpl implements ProjectDao {
             return project;
     
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Erro ao buscar projeto", e.getMessage());
             throw new FreelasException("Erro interno ao buscar projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -178,7 +181,7 @@ public class ProjectDaoImpl implements ProjectDao {
             }
             return projects;
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar projetos", e.getMessage());
             throw new FreelasException("Erro interno ao buscar projetos", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -223,7 +226,7 @@ public class ProjectDaoImpl implements ProjectDao {
             }
             return projects;
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar projetos", e.getMessage());
             throw new FreelasException("Erro interno ao buscar projetos", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -236,7 +239,7 @@ public class ProjectDaoImpl implements ProjectDao {
             Integer count = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, Integer.class);
             return count != null && count > 0;
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar projeto", e.getMessage());
             throw new FreelasException("Erro interno ao buscar projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -248,8 +251,8 @@ public class ProjectDaoImpl implements ProjectDao {
             Long idCustomer = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, Long.class);
             return idCustomer;
         }catch(Exception e){
-            e.printStackTrace();
-            throw new FreelasException("Erro interno ao buscar  cliente", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            log.error("Erro ao buscar cliente", e.getMessage());
+            throw new FreelasException("Erro interno ao buscar cliente", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
     @Override
@@ -266,7 +269,7 @@ public class ProjectDaoImpl implements ProjectDao {
                 namedParameterJdbcTemplate.update(query, sqlParameterSource);
             }
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao adicionar dependencias no projeto", e.getMessage());
             throw new FreelasException("Erro interno ao adicionar dependencias no projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -285,7 +288,7 @@ public class ProjectDaoImpl implements ProjectDao {
                 namedParameterJdbcTemplate.update(query, sqlParameterSource);
             }
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao remover dependencias no projeto", e.getMessage());
             throw new FreelasException("Erro interno ao remover dependencias no projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -299,7 +302,7 @@ public class ProjectDaoImpl implements ProjectDao {
             List<String> skills = namedParameterJdbcTemplate.query(query, namedParameters, (rs, rowNum) -> rs.getString("nm_skill_name"));
             return skills;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Erro ao buscar dependencias do projeto", e.getMessage());
             throw new FreelasException("Erro interno ao buscar dependências do projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -314,7 +317,7 @@ public class ProjectDaoImpl implements ProjectDao {
             String status = namedParameterJdbcTemplate.queryForObject(query, sqlParameterSource, String.class);
             return StatusProject.fromDescription(status);
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar status do projeto", e.getMessage());
             throw new FreelasException("Erro interno ao buscar status do projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
@@ -331,7 +334,7 @@ public class ProjectDaoImpl implements ProjectDao {
             }
             return price;
         }catch(Exception e){
-            e.printStackTrace();
+            log.error("Erro ao buscar preço do projeto", e.getMessage());
             throw new FreelasException("Erro interno ao buscar preço do projeto", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
