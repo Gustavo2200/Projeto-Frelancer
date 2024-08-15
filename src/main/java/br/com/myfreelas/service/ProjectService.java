@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import br.com.myfreelas.contantutils.ErrorMessageContants;
 import br.com.myfreelas.dao.freelancer.FreelancerDao;
 import br.com.myfreelas.dao.project.ProjectDao;
 import br.com.myfreelas.dto.project.ProjectDtoRequest;
@@ -43,7 +44,7 @@ public class ProjectService {
 
     public Project findProjectById(Long id) {
         if(!projectDao.checkProjectExists(id)) {
-            throw new FreelasException("Projeto não encontrado", HttpStatus.NOT_FOUND.value());
+            throw new FreelasException(ErrorMessageContants.PROJECT_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND.value());
         }
         return projectDao.getProjectById(id);
     }
@@ -54,13 +55,13 @@ public class ProjectService {
         }
         else{
             if(!projectDao.checkProjectExists(idProject)) {
-                throw new FreelasException("Projeto não encontrado", HttpStatus.NOT_FOUND.value());
+                throw new FreelasException(ErrorMessageContants.PROJECT_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND.value());
             }
         }
         
         StatusProject statusProject = projectDao.checkStatusProject(idProject);
         if(statusProject.equals(StatusProject.IN_PROGRESS) && !roleUser.equals("ADMIN")) {
-            throw new FreelasException("Para deletar projetos em andamento, contate o administrador", HttpStatus.FORBIDDEN.value());
+            throw new FreelasException(ErrorMessageContants.CANNOT_DELETE_ONGOING_PROJECTS.getMessage(), HttpStatus.FORBIDDEN.value());
         }
         projectDao.deleteProjectById(idProject);
     }
@@ -88,7 +89,7 @@ public class ProjectService {
             projectDao.removeSkillNecessary(idSkills, projectId);
         }
         else{
-            throw new FreelasException("Skill não encontrada para o projeto", HttpStatus.NOT_FOUND.value());
+            throw new FreelasException(ErrorMessageContants.SKILL_NOT_FOUND_TO_PROJECT.getMessage(), HttpStatus.NOT_FOUND.value());
         }
     }
 
@@ -106,13 +107,13 @@ public class ProjectService {
 
     private void checkBeforeAddSkills(List<Skill> skills, Long projectId) {
         if(skills.size() == 0) {
-            throw new FreelasException("Nenhum skill informado", HttpStatus.BAD_REQUEST.value());
+            throw new FreelasException(ErrorMessageContants.NO_SKILLS_REPORTED.getMessage(), HttpStatus.BAD_REQUEST.value());
         }
         List<String> skillsProject = projectDao.getSkillsByProjectId(projectId);
         for(Skill skill : skills) {
             for(String skillProject : skillsProject) {
                 if(skill.getSkill().equals(skillProject)) {
-                    throw new FreelasException("Skill ja adicionada no projeto", HttpStatus.BAD_REQUEST.value());
+                    throw new FreelasException(ErrorMessageContants.SKILL_ALREADY_SAVED.getMessage(), HttpStatus.BAD_REQUEST.value());
                 }
             }
         }
@@ -134,16 +135,16 @@ public class ProjectService {
         if(!status.equalsIgnoreCase(StatusProject.OPEN.getDescription())
         && !status.equalsIgnoreCase(StatusProject.IN_PROGRESS.getDescription())
         && !status.equalsIgnoreCase(StatusProject.DONE.getDescription())) {
-            throw new FreelasException("Status não definido", HttpStatus.NOT_FOUND.value());
+            throw new FreelasException(ErrorMessageContants.STATUS_PROJECT_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND.value());
         }
     }
     private void checkBeforeUpdate(Long  idProject, Long idCustomer) {
         if(!projectDao.checkProjectExists(idProject)){
             
-            throw new FreelasException("Projeto não encontrado", HttpStatus.NOT_FOUND.value());
+            throw new FreelasException(ErrorMessageContants.PROJECT_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND.value());
         }
         else if(projectDao.customerIdByProjectId(idProject) != idCustomer){
-            throw new FreelasException("Você so pode atualizar seus projetos", HttpStatus.FORBIDDEN.value());
+            throw new FreelasException(ErrorMessageContants.CUSTOMER_NOT_OWNER.getMessage(), HttpStatus.FORBIDDEN.value());
         }
     }
 }

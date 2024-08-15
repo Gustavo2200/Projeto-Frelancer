@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import br.com.myfreelas.contantutils.ErrorMessageContants;
 import br.com.myfreelas.dao.customer.CustomerDao;
 import br.com.myfreelas.dao.project.ProjectDao;
 import br.com.myfreelas.enums.StatusProject;
@@ -30,7 +31,7 @@ public class CustomerService {
 
     public void rejectProposal(Long idProposal, Long idCustomer) {
         if(!customerDao.checkProposalExists(idProposal)) {
-            throw new FreelasException("Proposta nao encontrada", HttpStatus.NOT_FOUND.value());
+            throw new FreelasException(ErrorMessageContants.PROPOSAL_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND.value());
         }
         Long idProject = customerDao.idProjectByIdProposal(idProposal);
 
@@ -40,7 +41,7 @@ public class CustomerService {
 
     public void acceptProposal(Long idProposal, Long idCustomer) {
         if(!customerDao.checkProposalExists(idProposal)) {
-            throw new FreelasException("Proposta nao encontrada", HttpStatus.NOT_FOUND.value());
+            throw new FreelasException(ErrorMessageContants.PROPOSAL_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND.value());
         }
         Long idProject = customerDao.idProjectByIdProposal(idProposal);
         validadeCustomer(idCustomer, idProject);
@@ -52,13 +53,13 @@ public class CustomerService {
         validadeCustomer(idCustomer, idProject);
 
         if(projectDao.checkStatusProject(idProject).getType() != StatusProject.IN_PROGRESS.getType()) {
-            throw new FreelasException("Voce so pode concluir projetos que estejam em andamento", HttpStatus.FORBIDDEN.value());
+            throw new FreelasException(ErrorMessageContants.PROJECT_NOT_OPEN.getMessage(), HttpStatus.FORBIDDEN.value());
         }
 
         BigDecimal valueProject = projectDao.priceByProjectId(idProject);
 
         if(!customerDao.checkBalanceCustomer(idCustomer, valueProject)){
-            throw new FreelasException("Seu saldo é insuficiente", HttpStatus.BAD_REQUEST.value());
+            throw new FreelasException(ErrorMessageContants.INSUFFICIENT_BALANCE.getMessage(), HttpStatus.BAD_REQUEST.value());
         }
         customerDao.completeProject(idProject);
     }
@@ -70,11 +71,11 @@ public class CustomerService {
     private void validadeCustomer(Long idCustomer, Long idProject) {
 
         if(!projectDao.checkProjectExists(idProject)) {
-            throw new FreelasException("Projeto nao encontrado", HttpStatus.NOT_FOUND.value());
+            throw new FreelasException(ErrorMessageContants.PROJECT_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND.value());
         }
 
         else if(idCustomer != projectDao.customerIdByProjectId(idProject)){
-            throw new FreelasException("Voce so pode gerenciar propostas do seu projeto", HttpStatus.BAD_REQUEST.value());
+            throw new FreelasException(ErrorMessageContants.CUSTOMER_NOT_OWNER.getMessage(), HttpStatus.BAD_REQUEST.value());
         }
     }
 }

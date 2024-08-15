@@ -12,8 +12,6 @@ public interface FreelancerDao {
 
     Long idBySkillName(String skill);
 
-    boolean checkSkillExists(String skill);
-
     boolean checkSkillIsAlreadySaved(Long idSkill, Long idFreelancer);
 
     void sendProposal(ProposalDtoRequest proposal, Long idFreelancer);

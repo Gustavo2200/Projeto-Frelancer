@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import br.com.myfreelas.contantutils.ErrorMessageContants;
+import br.com.myfreelas.contantutils.RegexUtils;
 import br.com.myfreelas.dao.freelancer.FreelancerDao;
 import br.com.myfreelas.dao.user.UserDao;
 import br.com.myfreelas.dto.freelancer.FreelancerDtoResponse;
@@ -34,31 +36,32 @@ public class UserService {
     }
 
     public void saveUser(User user) {
-        user.setPhone(user.getPhone().replaceAll("[^0-9]", ""));
-        user.setCpfCNPJ(user.getCpfCNPJ().replaceAll("[^0-9]", ""));
+        user.setPhone(user.getPhone().replaceAll(RegexUtils.ONLY_NUMBERS.getRegex(), ""));
+        user.setCpfCNPJ(user.getCpfCNPJ().replaceAll(RegexUtils.ONLY_NUMBERS.getRegex(), ""));
         checkRegex(user);
         checkBeforeSaving(user);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userDao.saveUser(user);
     }
     
-    public TypeUser typeUserById(Long id){
-        return userDao.typeUserById(id);
-    }
-     public FreelancerDtoResponse freelancerById(Long idFreelancer) {
-        User user = userDao.userById(idFreelancer);
-        if(user == null) {
-            throw new FreelasException("Usuario com esse id não encontrado", HttpStatus.NOT_FOUND.value());
-        }
-        return new FreelancerDtoResponse(user, freelancerDao.getSkillsByFreelancerId(idFreelancer), idFreelancer);
-    }
+     public UserDtoResponse userById(Long idUser) {
 
-    public UserDtoResponse customerById(Long idUser) {
+        TypeUser typeUser = typeUserById(idUser);
+
         User user = userDao.userById(idUser);
         if(user == null) {
-            throw new FreelasException("Usuario com esse id não encontrado", HttpStatus.NOT_FOUND.value());
+            throw new FreelasException(ErrorMessageContants.USER_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND.value());
         }
-        return new UserDtoResponse(user, idUser);
+
+        if(typeUser.equals(TypeUser.CUSTOMER) || typeUser.equals(TypeUser.ADMIN)) {
+            return new UserDtoResponse(user, idUser);
+        }
+        else if(typeUser.equals(TypeUser.FREELANCER)) {
+            return new FreelancerDtoResponse(user, idUser, freelancerDao.getSkillsByFreelancerId(idUser));
+        }
+
+        throw new FreelasException(ErrorMessageContants.USER_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND.value());
+        
     }
 
     public List<Transaction> transfrerHistoryByUserId(Long idUser) {
@@ -69,24 +72,28 @@ public class UserService {
         return userDao.getBalance(id);
     }
 
+    private TypeUser typeUserById(Long id){
+        return userDao.typeUserById(id);
+    }
+
     private void checkBeforeSaving(User user) {
         List<ErrResponse> erros = new ArrayList<>();
 
         if (userDao.checkCpfExists(user.getCpfCNPJ())) {
             if(user.getCpfCNPJ().length() == 14) {
-                erros.add(new ErrResponse("Cnpj já registrado", HttpStatus.CONFLICT.value()));
+                erros.add(new ErrResponse(ErrorMessageContants.CNPJ_ALREADY_REGISTERED.getMessage(), HttpStatus.CONFLICT.value()));
             }
             else{
-                erros.add(new ErrResponse("Cpf já registrado", HttpStatus.CONFLICT.value()));
+                erros.add(new ErrResponse(ErrorMessageContants.CPF_ALREADY_REGISTERED.getMessage(), HttpStatus.CONFLICT.value()));
             }
         }
 
         if (userDao.checkEmailExists(user.getEmail())) {
-            erros.add(new ErrResponse("Email já registrado", HttpStatus.CONFLICT.value()));
+            erros.add(new ErrResponse(ErrorMessageContants.EMAIL_ALREADY_REGISTERED.getMessage(), HttpStatus.CONFLICT.value()));
         }
 
         if (userDao.checkPhoneExists(user.getPhone())) {
-            erros.add(new ErrResponse("Telefone já registrado", HttpStatus.CONFLICT.value()));
+            erros.add(new ErrResponse(ErrorMessageContants.PHONE_ALREADY_REGISTERED.getMessage(), HttpStatus.CONFLICT.value()));
         }
 
         if (!erros.isEmpty()) {
@@ -96,44 +103,42 @@ public class UserService {
 
     private void checkRegex(User user) {
         List<ErrResponse> erros = new ArrayList<>();
-        String regexEmail = "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$";
-        String regexName = "[a-zA-Z]+(?:\\\\s[a-zA-Z]+)*";
 
-        if(!user.getName().matches(regexName)) {
-            erros.add(new ErrResponse("Nome não pode conter caracteres especiais ou numéricos", HttpStatus.BAD_REQUEST.value()));
+        if(!user.getName().matches(RegexUtils.VALID_NAME.getRegex())) {
+            erros.add(new ErrResponse(ErrorMessageContants.NAME_INVALID.getMessage(), HttpStatus.BAD_REQUEST.value()));
         }
         
         if(user.getCpfCNPJ().length() < 11 || user.getCpfCNPJ().length() > 14) {
-            erros.add(new ErrResponse("Cpf invalido", HttpStatus.BAD_REQUEST.value()));
+            erros.add(new ErrResponse(ErrorMessageContants.CPF_INVALID.getMessage(), HttpStatus.BAD_REQUEST.value()));
         }
         else if(user.getCpfCNPJ().length() == 11){
             if(!checkCpf(user.getCpfCNPJ())) {
-                erros.add(new ErrResponse("Cpf invalido", HttpStatus.BAD_REQUEST.value()));
+                erros.add(new ErrResponse(ErrorMessageContants.CPF_INVALID.getMessage(), HttpStatus.BAD_REQUEST.value()));
             }
         }
         else{
             if(!cnpjValidator.validateCnpj(user.getCpfCNPJ())){
-                erros.add(new ErrResponse("Cnpj invalido", HttpStatus.BAD_REQUEST.value()));
+                erros.add(new ErrResponse(ErrorMessageContants.CNPJ_INVALID.getMessage(), HttpStatus.BAD_REQUEST.value()));
             }
         }
 
-        if(!user.getEmail().matches(regexEmail)) {
-            erros.add(new ErrResponse("Email invalido", HttpStatus.BAD_REQUEST.value()));
+        if(!user.getEmail().matches(RegexUtils.VALID_EMAIL.getRegex())) {
+            erros.add(new ErrResponse(ErrorMessageContants.EMAIL_INVALID.getMessage(), HttpStatus.BAD_REQUEST.value()));
         }
 
         if(user.getPhone().length() != 11) {
-            erros.add(new ErrResponse("Telefone invalido", HttpStatus.BAD_REQUEST.value()));
+            erros.add(new ErrResponse(ErrorMessageContants.PHONE_INVALID.getMessage(), HttpStatus.BAD_REQUEST.value()));
         }
 
         if(user.getPassword().length() < 6 || user.getPassword().length() > 20) {
-            erros.add(new ErrResponse("Senha deve ter entre 6 e 20 caracteres", HttpStatus.BAD_REQUEST.value()));
+            erros.add(new ErrResponse(ErrorMessageContants.PASSWORD_INVALID.getMessage(), HttpStatus.BAD_REQUEST.value()));
         }
 
-        if(!(user.getTypeUser().getDescription().equals("FREELANCER") || 
-        user.getTypeUser().getDescription().equals("CUSTOMER") ||
-        user.getTypeUser().getDescription().equals("ADMIN"))) {
+        if(!user.getTypeUser().equals(TypeUser.FREELANCER) && 
+        !user.getTypeUser().equals(TypeUser.CUSTOMER) &&
+        !user.getTypeUser().equals(TypeUser.ADMIN)) {
             
-            throw new FreelasException("Tipo de usuario invalido, deve ser FREELANCER ou CUSTOMER", HttpStatus.BAD_REQUEST.value());
+            throw new FreelasException(ErrorMessageContants.TYPE_USER_INVALID.getMessage(), HttpStatus.BAD_REQUEST.value());
         }
 
         if (!erros.isEmpty()) {

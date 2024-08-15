@@ -1,128 +1,163 @@
 package br.com.myfreelas.dao.skill.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpStatus;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
 import lombok.extern.slf4j.Slf4j;
-
+import br.com.myfreelas.contantutils.ErrorDatabaseMessageConstants;
+import br.com.myfreelas.contantutils.FunctionsName;
+import br.com.myfreelas.contantutils.SqlFunctionCall;
 import br.com.myfreelas.dao.skill.SkillDao;
 import br.com.myfreelas.dto.skill.SkillDto;
-import br.com.myfreelas.err.exceptions.FreelasException;
+import br.com.myfreelas.err.exceptions.DataBaseException;
 import br.com.myfreelas.model.Skill;
 
 @Slf4j
 @Repository
 public class SkillDaoImpl implements SkillDao {
 
-   private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+   private JdbcTemplate jdbcTemplate;
 
-    public SkillDaoImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    public SkillDaoImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public void saveSkill(Skill skill) {
-        String querry = "INSERT INTO TB_SKILL(NM_SKILL_NAME) VALUES(:skill)";
-
-        SqlParameterSource namedParameters = new MapSqlParameterSource()
-                .addValue("skill", skill.getSkill());
-
-
+        
+        SimpleJdbcCall jdbcCall = createJdbcCall(FunctionsName.SAVE_SKILL.getFunctionName());
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("skill_name", skill.getSkill());
+        
         try{
-            namedParameterJdbcTemplate.update(querry, namedParameters);
+            jdbcCall.execute(sqlParameterSource);
+        
+        }catch(DataAccessException e){
+            log.error(ErrorDatabaseMessageConstants.ERROR_CONECTION_DATABASE.getMessageDev(), e.getMessage());
+            throw new DataBaseException(ErrorDatabaseMessageConstants.ERROR_CONECTION_DATABASE.getMessageUser());
+ 
         }catch(Exception e){
-            log.error("Erro ao salvar skill", e.getMessage());
-            throw new FreelasException("Erro interno ao salvar a skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            log.error(ErrorDatabaseMessageConstants.ERROR_SAVE_SKILL.getMessageDev(), e.getMessage());
+            throw new DataBaseException(ErrorDatabaseMessageConstants.ERROR_SAVE_SKILL.getMessageUser());
         }
     }
 
     @Override
     public List<SkillDto> getSkills() {
-        String querry = "SELECT * FROM TB_SKILL";
         try{
-            List<SkillDto> skills = namedParameterJdbcTemplate.query(querry, (rs, rowNum) -> {//funcao lambda
-                SkillDto skill = new SkillDto();                                              //Ela define como cada linha do resultado da consulta SQL será mapeada para um objeto SkillDto.
-                skill.setId(rs.getLong("NR_ID_SKILL"));                           // rs recebe o resultado da consulta SQL, e rowNum o numero de linhas retornadas.
-                skill.setSkill(rs.getString("NM_SKILL_NAME"));                    // para cada linha um novo objeto e criado e populado e ao final das linas o metodo query                   
-                return skill;                                                                 //coleta todos como uma lista e atribui a skills obtendo assim a lista completa.
-            });
-        
+            var result = jdbcTemplate.queryForList(SqlFunctionCall.GET_ALL_SKILLS);
+            List<SkillDto> skills = new ArrayList<>();
+
+            for(var r : result){
+                SkillDto skillDto = new SkillDto();
+                skillDto.setId(((Number) r.get("p_nr_id_skill")).longValue());
+                skillDto.setSkill((String) r.get("p_nm_skill_name"));
+                skills.add(skillDto);
+            }
             return skills;
+
+        }catch(DataAccessException e){
+            log.error(ErrorDatabaseMessageConstants.ERROR_CONECTION_DATABASE.getMessageDev(), e.getMessage());
+            throw new DataBaseException(ErrorDatabaseMessageConstants.ERROR_CONECTION_DATABASE.getMessageUser());
+ 
         }catch(Exception e){
-            log.error("Erro ao buscar skills", e.getMessage());
-            throw new FreelasException("Erro interno ao buscar as skills", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            log.error(ErrorDatabaseMessageConstants.ERROR_FIND_SKILL.getMessageDev(), e.getMessage());
+            throw new DataBaseException(ErrorDatabaseMessageConstants.ERROR_FIND_SKILL.getMessageUser());
         }
     }
 
     @Override
     public void deleteSkill(Long idSkill) {
-        String querry = "DELETE FROM TB_SKILL WHERE NR_ID_SKILL = :idSkill";
+        SimpleJdbcCall jdbcCall = createJdbcCall(FunctionsName.DELETE_SKILL_BY_ID.getFunctionName());
 
-        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("idSkill", idSkill);
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                    .addValue("p_id_skill", idSkill);
         try{
-            namedParameterJdbcTemplate.update(querry, namedParameters);
+            jdbcCall.execute(sqlParameterSource);
+        
+        }catch(DataAccessException e){
+            log.error(ErrorDatabaseMessageConstants.ERROR_CONECTION_DATABASE.getMessageDev(), e.getMessage());
+            throw new DataBaseException(ErrorDatabaseMessageConstants.ERROR_CONECTION_DATABASE.getMessageUser());
+ 
         }catch(Exception e){
-            log.error("Erro ao deletar skill", e.getMessage());
-            throw new FreelasException("Erro interno ao deletar a skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            log.error(ErrorDatabaseMessageConstants.ERROR_DELETE_SKILL.getMessageDev(), e.getMessage());
+            throw new DataBaseException(ErrorDatabaseMessageConstants.ERROR_DELETE_SKILL.getMessageUser());
         }
     }
 
     @Override
     public void updateSkill(SkillDto skilldto) {
-        String querry = "UPDATE TB_SKILL SET NM_SKILL_NAME = :skill WHERE NR_ID_SKILL = :idSkill";
+        SimpleJdbcCall jdbcCall = createJdbcCall(FunctionsName.UPDATE_SKILL.getFunctionName());
         SqlParameterSource namedParameters = new MapSqlParameterSource()
                 .addValue("skill", skilldto.getSkill())
-                .addValue("idSkill", skilldto.getId());
+                .addValue("p_id_skill", skilldto.getId());
         try{
-            namedParameterJdbcTemplate.update(querry, namedParameters);
+            jdbcCall.execute(namedParameters);
+        
+        }catch(DataAccessException e){
+            log.error(ErrorDatabaseMessageConstants.ERROR_CONECTION_DATABASE.getMessageDev(), e.getMessage());
+            throw new DataBaseException(ErrorDatabaseMessageConstants.ERROR_CONECTION_DATABASE.getMessageUser());
+ 
         }catch(Exception e){
-            log.error("Erro ao atualizar skill", e.getMessage());
-            throw new FreelasException("Erro interno ao atualizar a skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            log.error(ErrorDatabaseMessageConstants.ERROR_UPDATE_SKILL.getMessageDev(), e.getMessage());
+            throw new DataBaseException(ErrorDatabaseMessageConstants.ERROR_UPDATE_SKILL.getMessageUser());
         }
     }
 
     @Override
     public boolean checkSkillExists(String skill) {
-        String querry = "SELECT COUNT(1) FROM TB_SKILL WHERE NM_SKILL_NAME = :skill";
-
-        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("skill", skill);
+        SimpleJdbcCall jdbcCall = createJdbcCall(FunctionsName.CHECK_SKILL_EXISTS.getFunctionName());
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                    .addValue("skill", skill);
         try{
-            Integer count = namedParameterJdbcTemplate.queryForObject(querry, namedParameters, Integer.class);
-
-            if (count == null) {
-                return false;
-            }
+            Integer count = jdbcCall.executeFunction(Integer.class, namedParameters);
             return count > 0;
+        
+        }catch(DataAccessException e){
+            log.error(ErrorDatabaseMessageConstants.ERROR_CONECTION_DATABASE.getMessageDev(), e.getMessage());
+            throw new DataBaseException(ErrorDatabaseMessageConstants.ERROR_CONECTION_DATABASE.getMessageUser());
+ 
         }catch(Exception e){
-            log.error("Erro ao verificar skill", e.getMessage());
-            throw new FreelasException("Erro interno ao buscar a skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            log.error(ErrorDatabaseMessageConstants.ERROR_VERIFY_SKILL_EXISTS.getMessageDev(), e.getMessage());
+            throw new DataBaseException(ErrorDatabaseMessageConstants.ERROR_VERIFY_SKILL_EXISTS.getMessageUser());
         }
     }
 
     @Override
     public SkillDto getSkillById(Long idSkill) {
-        String querry = "SELECT * FROM TB_SKILL WHERE NR_ID_SKILL = :idSkill";
+        SimpleJdbcCall jdbcCall = createJdbcCall(FunctionsName.GET_SKILL_BY_ID.getFunctionName());
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                    .addValue("id_skill", idSkill);
         try{
-            SkillDto skill = namedParameterJdbcTemplate.queryForObject(querry, new MapSqlParameterSource().addValue("idSkill", idSkill), (rs, rowNum) -> {
-                SkillDto skillDto = new SkillDto();
-                skillDto.setId(rs.getLong("NR_ID_SKILL"));
-                skillDto.setSkill(rs.getString("NM_SKILL_NAME"));
-                return skillDto;
-            });
+            var result = jdbcCall.execute(sqlParameterSource);
+            SkillDto skill = new SkillDto();
+
+            skill.setId(((Number) result.get("p_nr_id_skill")).longValue());
+            skill.setSkill((String) result.get("p_nm_skill_name"));
             return skill;
-        }catch(EmptyResultDataAccessException e){
+        }catch(DataIntegrityViolationException e){
             return null;
-                
+        
+        }catch(DataAccessException e){
+            log.error(ErrorDatabaseMessageConstants.ERROR_CONECTION_DATABASE.getMessageDev(), e.getMessage());
+            throw new DataBaseException(ErrorDatabaseMessageConstants.ERROR_CONECTION_DATABASE.getMessageUser());
+ 
         }catch(Exception e){
-            log.error("Erro ao buscar skill", e.getMessage());
-            throw new FreelasException("Erro interno ao buscar a skill", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            log.error(ErrorDatabaseMessageConstants.ERROR_FIND_SKILL.getMessageDev(), e.getMessage());
+            throw new DataBaseException(ErrorDatabaseMessageConstants.ERROR_FIND_SKILL.getMessageUser());
         }
     }
+
+    private SimpleJdbcCall createJdbcCall(String functionName) {
+        return new SimpleJdbcCall(jdbcTemplate).withFunctionName(functionName);
+    } 
     
 }

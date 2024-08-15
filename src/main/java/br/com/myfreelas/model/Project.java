@@ -3,8 +3,11 @@ package br.com.myfreelas.model;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import br.com.myfreelas.enums.StatusProject;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Project {
     
     private Long id;

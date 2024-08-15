@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import br.com.myfreelas.contantutils.ErrorMessageContants;
 import br.com.myfreelas.dao.customer.CustomerDao;
 import br.com.myfreelas.dao.freelancer.FreelancerDao;
 import br.com.myfreelas.dao.project.ProjectDao;
@@ -35,7 +36,7 @@ public class FreelancerService {
         for(Skill skill : skills) {
             Long idSkill = checkBeforeSaving(skill.getSkill());
             if(this.freelancerDao.checkSkillIsAlreadySaved(idSkill, idFreelancer)) {
-                throw new FreelasException("Skill ja foi adicionada", HttpStatus.BAD_REQUEST.value());
+                throw new FreelasException(ErrorMessageContants.SKILL_ALREADY_SAVED.getMessage(), HttpStatus.BAD_REQUEST.value());
             }
             idSkills.add(idSkill);
         }
@@ -60,7 +61,7 @@ public class FreelancerService {
         }
 
         if(!check) {
-            throw new FreelasException("Skill não encontrada para esse freelancer", HttpStatus.NOT_FOUND.value());
+            throw new FreelasException(ErrorMessageContants.SKILL_NOT_FOUND_TO_FREELANCER.getMessage(), HttpStatus.NOT_FOUND.value());
         }
 
         for(Skill skill : skills) {
@@ -78,14 +79,14 @@ public class FreelancerService {
 
     public void sendProposal(ProposalDtoRequest proposal, Long idFreelancer) {
         if(!projectDao.checkProjectExists(proposal.getIdProject())){
-            throw new FreelasException("Projeto não encontrado", HttpStatus.NOT_FOUND.value());
+            throw new FreelasException(ErrorMessageContants.PROJECT_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND.value());
         }   
         else if(projectDao.checkStatusProject(proposal.getIdProject()).getType() != StatusProject.OPEN.getType()) {
-            throw new FreelasException("Apenas projetos abertos podem receber propostas", HttpStatus.BAD_REQUEST.value());
+            throw new FreelasException(ErrorMessageContants.PROJECT_NOT_OPEN_TO_SEND_PROPOSAL.getMessage(), HttpStatus.BAD_REQUEST.value());
         }
 
         if(checkBeforeSend(proposal, idFreelancer)) {
-            throw new FreelasException("Proposta ja enviada para esse projeto", HttpStatus.CONFLICT.value());
+            throw new FreelasException(ErrorMessageContants.PROPOSAL_ALREDY_SEND.getMessage(), HttpStatus.CONFLICT.value());
         }
         freelancerDao.sendProposal(proposal, idFreelancer);
     }
@@ -95,7 +96,7 @@ public class FreelancerService {
         Long idSkill = this.freelancerDao.idBySkillName(skillName);
 
         if(idSkill == null) {
-            throw new FreelasException("Skill inexistente", HttpStatus.NOT_FOUND.value());
+            throw new FreelasException(ErrorMessageContants.SKILL_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND.value());
         }
         return idSkill;
     }

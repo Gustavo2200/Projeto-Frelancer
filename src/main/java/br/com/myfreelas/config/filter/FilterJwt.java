@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -38,7 +39,8 @@ public class FilterJwt extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(
                         new UsernamePasswordAuthenticationToken(decodedJwt.getClaim("email").asString(),
                             decodedJwt.getClaim("password").asString(),
-                            Collections.emptyList()));
+                            Collections.singletonList(
+                                new SimpleGrantedAuthority(decodedJwt.getClaim("role").asString()))));
                 }
             }catch(Exception e){
                 response.setContentType("application/json");

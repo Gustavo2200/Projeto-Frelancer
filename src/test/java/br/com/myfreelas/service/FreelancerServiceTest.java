@@ -209,7 +209,7 @@ class FreelancerServiceTest {
     }
 
     @Test
-    @DisplayName("Envia propostas com sucesso para o projeto")
+    @DisplayName("Projeto não encontrado")
     void sendProposalErrorCase1() {
         ProposalDtoRequest proposal = new ProposalDtoRequest(26L,"Teste",new BigDecimal(500));
         Long idFreelancer = 12L;

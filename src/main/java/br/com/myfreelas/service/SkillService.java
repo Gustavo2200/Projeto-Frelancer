@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import br.com.myfreelas.contantutils.ErrorMessageContants;
 import br.com.myfreelas.dao.skill.SkillDao;
 import br.com.myfreelas.dto.skill.SkillDto;
 import br.com.myfreelas.err.exceptions.FreelasException;
@@ -21,7 +22,7 @@ public class SkillService {
 
     public void saveSkill(Skill skill) {
         if(skillDao.checkSkillExists(skill.getSkill())){
-            throw new FreelasException("Skill ja existe", HttpStatus.CONFLICT.value());
+            throw new FreelasException(ErrorMessageContants.SKILL_ALREADY_SAVED.getMessage(), HttpStatus.CONFLICT.value());
         }
         skillDao.saveSkill(skill);
     }
@@ -32,14 +33,14 @@ public class SkillService {
 
     public void deleteSkill(Long idSkill) {
             if(skillDao.getSkillById(idSkill) == null){
-                throw new FreelasException("Skill não encontrada", HttpStatus.NOT_FOUND.value());
+                throw new FreelasException(ErrorMessageContants.SKILL_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND.value());
             }
             skillDao.deleteSkill(idSkill);
     }
 
     public void updateSkill(SkillDto skillDto) {
             if(skillDao.getSkillById(skillDto.getId()) == null){
-                throw new FreelasException("Skill não encontrada", HttpStatus.NOT_FOUND.value());
+                throw new FreelasException(ErrorMessageContants.SKILL_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND.value());
             }
             
             skillDao.updateSkill(skillDto);

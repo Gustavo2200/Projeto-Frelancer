@@ -11,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import br.com.myfreelas.config.filter.FilterJwt;
@@ -20,9 +21,11 @@ import br.com.myfreelas.config.filter.FilterJwt;
 public class SecurityConfig {
     
     private FilterJwt filterJwt;
+    private AccessDeniedHandler accessDeniedHandler;
 
-    public SecurityConfig(FilterJwt filterJwt) {
+    public SecurityConfig(FilterJwt filterJwt, AccessDeniedHandler accessDeniedHandler) {
         this.filterJwt = filterJwt;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -33,7 +36,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/get-token").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/save-user").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**","/v3/api-docs/**").permitAll()
+                        .requestMatchers("/skill/**").hasAuthority("ADMIN")
+                        .requestMatchers("/freelancers/**").hasAnyAuthority("ADMIN", "FREELANCER")
+                        .requestMatchers("/customer/**").hasAnyAuthority("ADMIN", "CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/project/my-projectsBy").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/project/my-projects").authenticated()
+                        .requestMatchers("/project/**").hasAnyAuthority("ADMIN", "CUSTOMER")
                         .anyRequest().authenticated())
+                .exceptionHandling(exception -> exception.accessDeniedHandler(accessDeniedHandler))
                 .addFilterBefore(filterJwt, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }          
